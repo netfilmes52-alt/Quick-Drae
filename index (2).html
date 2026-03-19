@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Quick Draw</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.2/peerjs.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Oswald:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; touch-action:manipulation; user-select:none; -webkit-tap-highlight-color:transparent; }
+html,body { width:100%; height:100%; overflow:hidden; background:#080400; font-family:'Oswald',sans-serif; color:#f5e6c8; }
+
+#app { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; transition:background .5s; }
+
+/* PAGES */
+.pg { position:fixed; inset:0; opacity:0; pointer-events:none; transition:opacity .3s; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:24px; padding:36px 28px; text-align:center; }
+.pg.on { opacity:1; pointer-events:all; }
+
+/* LOGO */
+.logo { font-family:'Rye',cursive; font-size:46px; color:#f0c040; text-shadow:3px 3px 0 #2a0e00, 0 0 40px rgba(240,192,64,.4); line-height:1.1; }
+.logo small { display:block; font-size:11px; letter-spacing:7px; color:#2a1600; font-family:'Oswald'; font-weight:300; margin-top:6px; }
+
+/* CARDS */
+.card { background:rgba(255,255,255,.025); border:1px solid rgba(240,192,64,.12); border-radius:14px; padding:24px 22px; width:100%; max-width:300px; display:flex; flex-direction:column; gap:16px; }
+
+/* BUTTONS */
+.btn { font-family:'Rye',cursive; font-size:20px; letter-spacing:3px; padding:16px 0; width:100%; max-width:260px; border-radius:8px; cursor:pointer; }
+.btn-red { background:linear-gradient(160deg,#7a0000,#b52020); color:#f0c040; border:2.5px solid #f0c040; box-shadow:0 6px 0 #380000; }
+.btn-red:active { transform:translateY(5px); box-shadow:0 1px 0 #380000; }
+.btn-ghost { background:transparent; color:#f0c040; border:2px solid rgba(240,192,64,.35); }
+.btn-ghost:active { background:rgba(240,192,64,.08); }
+
+/* INPUT */
+.code-input { font-family:'Rye',cursive; font-size:36px; letter-spacing:12px; text-align:center; background:rgba(255,255,255,.04); border:2px solid rgba(240,192,64,.25); border-radius:10px; color:#f0c040; padding:16px 12px; width:100%; max-width:220px; outline:none; text-transform:uppercase; }
+.code-input::placeholder { color:#2a1800; letter-spacing:8px; }
+
+/* ROOM CODE DISPLAY */
+.room-code { font-family:'Rye',cursive; font-size:54px; letter-spacing:14px; color:#f0c040; text-shadow:0 0 30px rgba(240,192,64,.5); }
+.room-hint { font-size:12px; letter-spacing:4px; color:#3a2000; font-weight:300; }
+
+/* STATUS */
+.status-dot { width:10px; height:10px; border-radius:50%; background:#e74c3c; display:inline-block; margin-right:8px; animation:pulse 1.2s infinite; }
+.status-dot.green { background:#2ecc71; animation:none; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+/* GAME SCREEN */
+#pgGame { justify-content:space-between; padding:44px 28px 54px; }
+.vs-bar { width:100%; display:flex; justify-content:space-between; align-items:center; }
+.player-side { display:flex; flex-direction:column; gap:4px; }
+.pl-name { font-size:10px; letter-spacing:3px; color:#2a1800; font-weight:300; }
+.pl-score { font-size:28px; font-weight:700; color:#3a2000; }
+.pl-score.lit { color:#f0c040; }
+.vs-mid { font-family:'Rye',cursive; font-size:16px; color:#1a1000; }
+
+.mid { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; }
+
+.icon-big  { font-size:76px; line-height:1; }
+.lbl-big   { font-family:'Rye',cursive; font-size:32px; letter-spacing:3px; line-height:1.2; }
+.lbl-small { font-size:11px; letter-spacing:5px; font-weight:300; color:#2a1800; }
+
+/* Result */
+.ms-num  { font-size:86px; font-weight:700; letter-spacing:-3px; line-height:1; }
+.ms-unit { font-size:18px; font-weight:300; color:#3a2000; letter-spacing:2px; margin-left:3px; }
+.ms-rank { font-family:'Rye',cursive; font-size:20px; }
+.vs-result { font-family:'Rye',cursive; font-size:26px; letter-spacing:3px; margin-top:4px; }
+
+/* Waiting for opponent chip */
+.chip { background:rgba(255,255,255,.03); border:1px solid rgba(240,192,64,.15); border-radius:20px; padding:8px 18px; font-size:12px; letter-spacing:3px; color:#3a2000; font-weight:300; }
+
+/* OVERLAYS */
+#ovF { position:fixed; inset:0; z-index:999; pointer-events:none; opacity:0; background:rgba(255,240,160,.7); }
+#ovF.go { animation:fla .4s forwards; }
+@keyframes fla { 0%{opacity:1} 100%{opacity:0} }
+#ovR { position:fixed; inset:0; z-index:998; pointer-events:none; opacity:0; }
+#ovR.go { animation:rda .5s forwards; }
+@keyframes rda { 0%{background:rgba(200,20,0,.3)} 100%{background:transparent;opacity:0} }
+#pcv { position:fixed; inset:0; pointer-events:none; z-index:900; }
+</style>
+</head>
+<body>
+
+<canvas id="pcv"></canvas>
+<div id="ovF"></div>
+<div id="ovR"></div>
+
+<div id="app">
+
+  <!-- ═══ MENU ═══ -->
+  <div class="pg on" id="pgMenu">
+    <div class="logo">Quick Draw<small>Duelo Online</small></div>
+    <button class="btn btn-red" id="btnCreate">CRIAR SALA</button>
+    <button class="btn btn-ghost" id="btnJoinOpen">ENTRAR NA SALA</button>
+  </div>
+
+  <!-- ═══ HOST LOBBY ═══ -->
+  <div class="pg" id="pgHost">
+    <div class="logo" style="font-size:32px">Sua Sala</div>
+    <div class="card" style="align-items:center; gap:20px">
+      <div class="room-hint">CÓDIGO DA SALA</div>
+      <div class="room-code" id="roomCode">----</div>
+      <div class="room-hint">Manda esse código pro seu amigo</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="status-dot" id="hostDot"></span>
+        <span style="font-size:13px;color:#3a2000;letter-spacing:2px" id="hostStatus">Aguardando conexão...</span>
+      </div>
+    </div>
+    <button class="btn btn-ghost" id="btnCancelHost">CANCELAR</button>
+  </div>
+
+  <!-- ═══ JOIN LOBBY ═══ -->
+  <div class="pg" id="pgJoin">
+    <div class="logo" style="font-size:32px">Entrar</div>
+    <div class="card" style="align-items:center; gap:16px">
+      <div class="room-hint">CÓDIGO DA SALA</div>
+      <input class="code-input" id="codeInput" maxlength="4" placeholder="XXXX" autocomplete="off" autocorrect="off" spellcheck="false">
+      <div style="font-size:12px;color:#3a2000;font-weight:300;letter-spacing:2px" id="joinError"></div>
+    </div>
+    <button class="btn btn-red" id="btnConnect">CONECTAR</button>
+    <button class="btn btn-ghost" id="btnCancelJoin">VOLTAR</button>
+  </div>
+
+  <!-- ═══ GAME ═══ -->
+  <div class="pg" id="pgGame">
+    <div class="vs-bar">
+      <div class="player-side">
+        <div class="pl-name">VOCÊ</div>
+        <div class="pl-score" id="myScore">0</div>
+      </div>
+      <div class="vs-mid">VS</div>
+      <div class="player-side" style="text-align:right">
+        <div class="pl-name">RIVAL</div>
+        <div class="pl-score" id="theirScore">0</div>
+      </div>
+    </div>
+
+    <div class="mid" id="mid"></div>
+
+    <div class="chip" id="bottomChip" style="visibility:hidden">⚔️ MELHOR DE 5</div>
+  </div>
+
+</div>
+
+<script>
+/* ── PARTICLES ── */
+const pcv=document.getElementById('pcv'),pctx=pcv.getContext('2d');
+pcv.width=innerWidth;pcv.height=innerHeight;
+addEventListener('resize',()=>{pcv.width=innerWidth;pcv.height=innerHeight;});
+const pts=[];
+function spawnPts(x,y,col,n){for(let i=0;i<n;i++)pts.push({x,y,vx:(Math.random()-.5)*14,vy:(Math.random()-2)*10,a:1,r:Math.random()*6+2,col});}
+(function loop(){pctx.clearRect(0,0,pcv.width,pcv.height);for(let i=pts.length-1;i>=0;i--){const p=pts[i];p.x+=p.vx;p.y+=p.vy;p.vy+=.4;p.a-=.02;if(p.a<=0){pts.splice(i,1);continue;}pctx.globalAlpha=p.a;pctx.fillStyle=p.col;pctx.beginPath();pctx.arc(p.x,p.y,p.r,0,Math.PI*2);pctx.fill();}pctx.globalAlpha=1;requestAnimationFrame(loop);})();
+
+/* ── AUDIO ── */
+let AC;
+function ac(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();}
+
+function sndSignal(){
+  ac();
+  const o=AC.createOscillator(),g=AC.createGain();
+  o.connect(g);g.connect(AC.destination);
+  o.type='square';o.frequency.value=1200;
+  g.gain.setValueAtTime(1.0,AC.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.18);
+  o.start();o.stop(AC.currentTime+.2);
+  const o2=AC.createOscillator(),g2=AC.createGain();
+  o2.connect(g2);g2.connect(AC.destination);
+  o2.type='sawtooth';o2.frequency.value=600;
+  g2.gain.setValueAtTime(.8,AC.currentTime+.05);
+  g2.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.25);
+  o2.start(AC.currentTime+.05);o2.stop(AC.currentTime+.28);
+}
+
+function sndGun(){
+  ac();
+  const buf=AC.createBuffer(1,AC.sampleRate*.7,AC.sampleRate),d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/AC.sampleRate*10)*(i<300?i/300:1);
+  const s=AC.createBufferSource(),g=AC.createGain(),f=AC.createBiquadFilter();
+  f.type='lowpass';f.frequency.value=700;g.gain.value=1.0;
+  s.buffer=buf;s.connect(f);f.connect(g);g.connect(AC.destination);s.start();
+  const o=AC.createOscillator(),og=AC.createGain();
+  o.connect(og);og.connect(AC.destination);
+  o.type='sawtooth';o.frequency.value=80;
+  og.gain.setValueAtTime(.6,AC.currentTime);
+  og.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.4);
+  o.start();o.stop(AC.currentTime+.45);
+}
+
+function sndTick(){
+  ac();
+  const o=AC.createOscillator(),g=AC.createGain();
+  o.connect(g);g.connect(AC.destination);
+  o.type='sine';o.frequency.value=800;
+  g.gain.setValueAtTime(.3,AC.currentTime);
+  g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.06);
+  o.start();o.stop(AC.currentTime+.07);
+}
+
+/* ── VIB ── */
+function vib(p){ try{ navigator.vibrate&&navigator.vibrate(p); }catch(e){} }
+
+/* ── HELPERS ── */
+const $=id=>document.getElementById(id);
+function show(id){ ['pgMenu','pgHost','pgJoin','pgGame'].forEach(p=>$(p).classList.toggle('on',p===id)); }
+function setMid(h){ $('mid').innerHTML=h; }
+function flash(){ const e=$('ovF');e.className='';requestAnimationFrame(()=>e.className='go'); }
+function redFlash(){ const e=$('ovR');e.className='';requestAnimationFrame(()=>e.className='go'); }
+
+/* ── CODE GENERATOR ── */
+function makeCode(){
+  const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let r='';
+  for(let i=0;i<4;i++) r+=c[Math.floor(Math.random()*c.length)];
+  return r;
+}
+
+/* ════════════════════════════════════════
+   GAME STATE — IMPROVED
+   ════════════════════════════════════════
+
+   SYNC STRATEGY (CLOCK SYNC):
+   After connection, host runs 5 rounds of SYNC_PING/SYNC_PONG
+   to measure clock offset between devices. This offset is sent
+   to the guest so it can adjust DRAW timestamps.
+
+   When HOST sends DRAW {at: hostTimestamp}:
+   - Host schedules locally: setTimeout(trigger, at - Date.now())
+   - Guest adjusts: guestAt = at + clockOffset
+   - Guest schedules: setTimeout(trigger, guestAt - Date.now())
+   → Both see SACA! at the exact same real-world instant
+
+   MESSAGES:
+   SYNC_PING {t1}          - host→guest: clock sync request
+   SYNC_PONG {t1, t2}      - guest→host: clock sync response
+   SYNC_DONE {offset}      - host→guest: final clock offset
+   READY                    - both sides: player holstered
+   DRAW {at}               - host→guest: fire at this timestamp (host clock)
+   RESULT {ms}             - both sides: reaction time
+   EARLY                   - both sides: jumped the gun
+   ROUND_AGAIN             - both sides: start next round
+*/
+
+let peer, conn;
+let role = null;
+let myCode = null;
+
+// Clock sync
+let clockOffset = 0;    // guestClock - hostClock (used by guest to adjust timestamps)
+let syncSamples = [];
+let syncDone = false;
+
+// Game state
+let STATE       = 'idle';
+let drawAt      = 0;
+let localDrawAt = 0;    // adjusted draw timestamp in local clock
+let holsterSince = 0;
+let silentTimer  = null;
+let didFire     = false;
+let myMs        = null;
+let theirMs     = null;
+let myScore     = 0;
+let theirScore  = 0;
+let hostReady   = false;
+let guestReady  = false;
+let hasSensors  = false;
+
+/* ── SENSOR ── */
+let betaSmooth = 0, betaPrev = 0;
+const HOLSTER_THRESH = -45;
+const HOLSTER_MS     = 300;
+const RAISED_DELTA   = 18;
+const RAISED_ABS     = -10;
+
+function onOrient(e){
+  hasSensors = true;
+  const raw = e.beta || 0;
+  betaSmooth = betaSmooth * .5 + raw * .5;
+  const delta = betaSmooth - betaPrev;
+  betaPrev = betaSmooth;
+  const isDown = betaSmooth < HOLSTER_THRESH;
+
+  if(STATE === 'holster'){
+    if(isDown){
+      if(!holsterSince) holsterSince = Date.now();
+      if(Date.now() - holsterSince >= HOLSTER_MS) onHolstered();
+    } else {
+      holsterSince = 0;
+    }
+  }
+
+  if(STATE === 'waiting'){
+    if(!isDown && delta > 15) onEarly();
+  }
+
+  if(STATE === 'draw'){
+    if(delta > RAISED_DELTA || betaSmooth > RAISED_ABS) onFired();
+  }
+}
+
+let prevAy = 0;
+function onMotion(e){
+  const a = e.accelerationIncludingGravity; if(!a) return;
+  hasSensors = true;
+  const ay = a.y || 0, ax = a.x || 0, az = a.z || 0;
+  const d = ay - prevAy; prevAy = ay;
+  if(STATE === 'draw'){
+    const mag = Math.sqrt(ax*ax + ay*ay + az*az);
+    if(d < -13 || mag > 21) onFired();
+  }
+}
+
+function startSensors(){
+  window.addEventListener('deviceorientation', onOrient, true);
+  window.addEventListener('devicemotion', onMotion, true);
+  // Request permission on iOS 13+
+  if(typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function'){
+    DeviceOrientationEvent.requestPermission().catch(()=>{});
+  }
+  if(typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function'){
+    DeviceMotionEvent.requestPermission().catch(()=>{});
+  }
+}
+
+/* ── TAP TO SHOOT (desktop fallback + mobile supplement) ── */
+function onTapShoot(e){
+  if(e.target.closest && e.target.closest('.btn')) return; // ignore button clicks
+  if(STATE === 'holster'){
+    onHolstered();
+  } else if(STATE === 'draw'){
+    onFired();
+  } else if(STATE === 'waiting'){
+    // tapping during wait = early draw
+    onEarly();
+  }
+}
+document.addEventListener('pointerdown', onTapShoot);
+
+/* ════ CLOCK SYNC ════ */
+
+function startClockSync(callback){
+  if(role === 'host'){
+    syncSamples = [];
+    syncDone = false;
+    sendSyncPing(0, callback);
+  }
+}
+
+function sendSyncPing(round, callback){
+  if(round >= 5){
+    // Calculate median offset
+    syncSamples.sort((a, b) => a.rtt - b.rtt);
+    // Take the sample with lowest RTT (most accurate)
+    const best = syncSamples[0];
+    clockOffset = best ? best.offset : 0;
+    syncDone = true;
+    // Tell guest the offset
+    send({type: 'SYNC_DONE', offset: clockOffset});
+    if(callback) callback();
+    return;
+  }
+  send({type: 'SYNC_PING', t1: Date.now(), round});
+  // Store callback for when PONG arrives
+  peer._syncCallback = callback;
+  peer._syncRound = round;
+}
+
+function handleSyncPong(msg){
+  const t4 = Date.now();
+  const rtt = (t4 - msg.t1) - (msg.t3 - msg.t2);
+  const oneWay = Math.max(0, rtt / 2);
+  const offset = msg.t2 - msg.t1 - oneWay;
+  syncSamples.push({rtt: t4 - msg.t1, offset});
+  const nextRound = (peer._syncRound || 0) + 1;
+  sendSyncPing(nextRound, peer._syncCallback);
+}
+
+/* ════ GAME FLOW ════ */
+
+function startGame(){
+  myScore = 0; theirScore = 0;
+  updateScores();
+  show('pgGame');
+
+  // Show "connected" screen briefly
+  $('app').style.background = '#080400';
+  setMid(`
+    <div class="icon-big">🤝</div>
+    <div class="lbl-big" style="color:#2ecc71;font-size:28px">Conectado!</div>
+    <div class="lbl-small">PREPARANDO DUELO...</div>
+  `);
+  $('bottomChip').style.visibility = 'visible';
+  $('bottomChip').textContent = '⚔️ MELHOR DE 5';
+
+  if(role === 'host'){
+    // Run clock sync before starting first round
+    startClockSync(()=>{
+      send({type: 'ROUND_START'});
+      setTimeout(startRound, 400);
+    });
+  }
+  // Guest waits for ROUND_START message after clock sync
+}
+
+function startRound(){
+  STATE = 'holster';
+  holsterSince = 0;
+  didFire = false;
+  myMs = null;
+  theirMs = null;
+  hostReady = false;
+  guestReady = false;
+  show('pgGame');
+  $('app').style.background = '#080400';
+  showHolster();
+}
+
+function showHolster(){
+  const tapHint = !hasSensors ? '<div class="lbl-small" style="margin-top:8px;color:#5a3800">OU TOCA NA TELA</div>' : '';
+  setMid(`
+    <div class="icon-big">🔫</div>
+    <div class="lbl-big" style="color:#2a1600">Prepara!</div>
+    <div class="lbl-small">APONTA O CELULAR PRA BAIXO</div>
+    ${tapHint}
+  `);
+  $('bottomChip').style.visibility = 'visible';
+  $('bottomChip').textContent = '⚔️ MELHOR DE 5';
+}
+
+function onHolstered(){
+  if(STATE !== 'holster') return;
+  holsterSince = 0;
+  STATE = 'waiting';
+
+  sndTick();
+  vib([50]);
+
+  send({type: 'READY'});
+
+  if(role === 'host'){
+    hostReady = true;
+    checkBothReady();
+  } else {
+    guestReady = true;
+    checkBothReady();
+  }
+}
+
+function checkBothReady(){
+  if(role === 'host'){
+    if(hostReady && guestReady){
+      showBothReady();
+      startTension();
+    } else if(hostReady && !guestReady){
+      showWaitingForOpponent();
+    }
+  } else {
+    // Guest side
+    if(guestReady && hostReady){
+      showBothReady();
+    } else if(guestReady && !hostReady){
+      showWaitingForOpponent();
+    }
+  }
+}
+
+function showWaitingForOpponent(){
+  $('app').style.background = '#050200';
+  setMid(`
+    <div class="icon-big" style="opacity:.5">⏳</div>
+    <div class="lbl-big" style="color:#1a0e00;font-size:22px">Aguardando rival...</div>
+    <div class="lbl-small">ELE AINDA ESTÁ SE POSICIONANDO</div>
+  `);
+  $('bottomChip').style.visibility = 'hidden';
+}
+
+function showBothReady(){
+  $('app').style.background = '#050200';
+  setMid(`
+    <div class="icon-big" style="opacity:.3">🤫</div>
+    <div class="lbl-big" style="color:#1a0e00;font-size:22px">Silêncio...</div>
+    <div class="lbl-small" style="animation:pulse 1.2s infinite">AGUARDANDO O SINAL</div>
+  `);
+  $('bottomChip').style.visibility = 'hidden';
+}
+
+function startTension(){
+  if(role !== 'host') return;
+  const delay = 1500 + Math.random() * 4500;
+  clearTimeout(silentTimer);
+  silentTimer = setTimeout(()=>{
+    if(STATE === 'waiting'){
+      // Pick future timestamp 300ms ahead (clock sync means we need less buffer)
+      const buffer = syncDone ? 300 : 600;
+      const at = Date.now() + buffer;
+      send({type: 'DRAW', at});
+      scheduleLocalDraw(at);
+    }
+  }, delay);
+}
+
+function scheduleLocalDraw(at){
+  // For guest: adjust host's timestamp to local clock using offset
+  if(role === 'guest' && syncDone){
+    localDrawAt = at + clockOffset;
+  } else {
+    localDrawAt = at;
+  }
+  const delay = localDrawAt - Date.now();
+  setTimeout(()=>{
+    if(STATE === 'waiting') triggerDraw();
+  }, Math.max(0, delay));
+}
+
+function triggerDraw(){
+  if(STATE !== 'waiting') return;
+  STATE = 'draw';
+  drawAt = localDrawAt; // use local-clock adjusted time for reaction measurement
+  didFire = false;
+
+  navigator.vibrate(0);
+  setTimeout(()=>navigator.vibrate(500), 10);
+  sndSignal();
+  redFlash();
+  $('app').style.background = '#1a0400';
+
+  const tapHint = !hasSensors ? '<div class="lbl-small" style="color:#ff6600;margin-top:4px">TOCA NA TELA!</div>' : '';
+  setMid(`
+    <div class="icon-big">🤠</div>
+    <div class="lbl-big" style="color:#f0c040;text-shadow:0 0 30px #f0c040">⚡ SACA! ⚡</div>
+    <div class="lbl-small" style="color:#8b5010">LEVANTA O CELULAR!</div>
+    ${tapHint}
+  `);
+  $('bottomChip').style.visibility = 'hidden';
+}
+
+function onFired(){
+  if(STATE !== 'draw' || didFire) return;
+  didFire = true;
+  const ms = Date.now() - drawAt;
+
+  if(ms < 0 || ms < 50){
+    STATE = 'result';
+    navigator.vibrate(0);
+    vib([500]);
+    send({type: 'EARLY'});
+    showCheated();
+    return;
+  }
+
+  myMs = ms;
+  STATE = 'result';
+  navigator.vibrate(0);
+  flash();
+  spawnPts(innerWidth/2, innerHeight * .45, '#f0c040', 22);
+  spawnPts(innerWidth/2, innerHeight * .45, '#ff8800', 10);
+  vib([100, 30, 100]);
+  sndGun();
+
+  send({type: 'RESULT', ms});
+  showMyResult(ms);
+}
+
+function onEarly(){
+  if(STATE !== 'waiting') return;
+  STATE = 'result';
+  clearTimeout(silentTimer);
+  vib([500]);
+  send({type: 'EARLY'});
+  showEarlyDraw();
+}
+
+/* ── SHOW STATES ── */
+function showMyResult(ms){
+  const col = ms < 150 ? '#2ecc71' : ms < 250 ? '#f0c040' : ms < 400 ? '#ff8800' : '#e74c3c';
+  let rk = '';
+  if(ms < 150) rk = '🌟 LENDÁRIO';
+  else if(ms < 200) rk = '⚡ RELÂMPAGO';
+  else if(ms < 280) rk = '🔥 RÁPIDO';
+  else if(ms < 380) rk = '👍 BOM';
+  else if(ms < 500) rk = '😅 OK';
+  else rk = '🐢 DEVAGAR';
+  $('app').style.background = '#080400';
+  setMid(`
+    <div class="ms-num" style="color:${col}">${ms}<span class="ms-unit">ms</span></div>
+    <div class="ms-rank" style="color:${col}">${rk}</div>
+    <div class="lbl-small" style="margin-top:8px">AGUARDANDO RIVAL...</div>
+  `);
+  tryResolveRound();
+}
+
+function showCheated(){
+  $('app').style.background = '#120000';
+  setMid(`
+    <div class="icon-big">🤥</div>
+    <div class="lbl-big" style="color:#e74c3c">Burlou!</div>
+    <div class="lbl-small">ATIROU ANTES DO SINAL</div>
+  `);
+  myMs = 9999;
+  send({type: 'RESULT', ms: 9999});
+  tryResolveRound();
+}
+
+function showEarlyDraw(){
+  $('app').style.background = '#120000';
+  setMid(`
+    <div class="icon-big">😤</div>
+    <div class="lbl-big" style="color:#e74c3c">Antecipou!</div>
+    <div class="lbl-small">MOVEU ANTES DO SINAL</div>
+  `);
+  myMs = 9999;
+  send({type: 'RESULT', ms: 9999});
+  tryResolveRound();
+}
+
+function tryResolveRound(){
+  if(myMs === null || theirMs === null) return;
+  resolveRound();
+}
+
+function resolveRound(){
+  const iWon = myMs < theirMs;
+  const isDraw = myMs === theirMs;
+  if(isDraw){
+    // Tie — no points, replay
+    $('app').style.background = '#080400';
+    setMid(`
+      <div class="vs-result" style="color:#f0c040">⚡ EMPATE! ⚡</div>
+      <div class="lbl-small">Ambos: ${myMs === 9999 ? 'BURLA' : myMs + 'ms'}</div>
+      <div style="margin-top:16px;font-size:13px;color:#3a2000;letter-spacing:3px">${myScore} × ${theirScore}</div>
+      <button class="btn btn-ghost" style="margin-top:16px;max-width:220px;font-size:18px" onclick="sendNextRound()">REPETIR RODADA →</button>
+    `);
+    return;
+  }
+
+  if(iWon) myScore++; else theirScore++;
+  updateScores();
+
+  const col = iWon ? '#2ecc71' : '#e74c3c';
+  const wl = iWon ? '🏆 VENCEU!' : '💀 PERDEU!';
+  const detail = `Você: ${myMs === 9999 ? 'BURLA' : myMs + 'ms'} · Rival: ${theirMs === 9999 ? 'BURLA' : theirMs + 'ms'}`;
+  const diff = Math.abs(myMs - theirMs);
+  const diffText = (myMs !== 9999 && theirMs !== 9999) ? `Diferença: ${diff}ms` : '';
+
+  const isMatchOver = (myScore >= 3 || theirScore >= 3);
+
+  $('app').style.background = '#080400';
+  if(isMatchOver){
+    spawnPts(innerWidth/2, innerHeight * .3, iWon ? '#2ecc71' : '#e74c3c', 30);
+    spawnPts(innerWidth/2, innerHeight * .3, '#f0c040', 15);
+    setMid(`
+      <div class="vs-result" style="color:${col};font-size:40px">${iWon ? '🏆 VOCÊ GANHOU!' : '💀 VOCÊ PERDEU!'}</div>
+      <div class="lbl-small" style="margin-top:4px">${detail}</div>
+      <div style="margin-top:20px;font-size:13px;color:#3a2000;letter-spacing:3px">${myScore} × ${theirScore}</div>
+      <button class="btn btn-red" style="margin-top:20px;max-width:220px;font-size:18px" onclick="sendRematch()">REVANCHE</button>
+      <button class="btn btn-ghost" style="margin-top:8px;max-width:220px;font-size:14px" onclick="backToMenu()">MENU</button>
+    `);
+  } else {
+    setMid(`
+      <div class="vs-result" style="color:${col}">${wl}</div>
+      <div class="lbl-small">${detail}</div>
+      ${diffText ? '<div class="lbl-small" style="color:#5a3800;margin-top:2px">' + diffText + '</div>' : ''}
+      <div style="margin-top:16px;font-size:13px;color:#3a2000;letter-spacing:3px">${myScore} × ${theirScore}</div>
+      <button class="btn btn-ghost" style="margin-top:16px;max-width:220px;font-size:18px" onclick="sendNextRound()">PRÓXIMA RODADA →</button>
+    `);
+  }
+}
+
+function sendNextRound(){
+  send({type: 'ROUND_AGAIN'});
+  startRound();
+}
+
+function sendRematch(){
+  myScore = 0; theirScore = 0;
+  updateScores();
+  send({type: 'REMATCH'});
+  startRound();
+}
+
+function updateScores(){
+  $('myScore').textContent = myScore;
+  $('theirScore').textContent = theirScore;
+  $('myScore').className = 'pl-score' + (myScore > theirScore ? ' lit' : '');
+  $('theirScore').className = 'pl-score' + (theirScore > myScore ? ' lit' : '');
+}
+
+/* ════ PEERJS ════ */
+
+function initPeer(id){
+  peer = new Peer(id, {
+    host: '0.peerjs.com',
+    port: 443,
+    path: '/',
+    secure: true,
+    debug: 0
+  });
+  peer.on('error', err => {
+    console.error('PeerJS error:', err);
+  });
+  return peer;
+}
+
+function send(msg){
+  try{ if(conn && conn.open) conn.send(JSON.stringify(msg)); }catch(e){}
+}
+
+function onMessage(raw){
+  const msg = JSON.parse(raw);
+
+  // ── Clock Sync Messages ──
+  if(msg.type === 'SYNC_PING'){
+    // Guest receives: respond immediately
+    send({type: 'SYNC_PONG', t1: msg.t1, t2: Date.now(), t3: Date.now(), round: msg.round});
+    return;
+  }
+
+  if(msg.type === 'SYNC_PONG'){
+    // Host receives: calculate offset
+    handleSyncPong(msg);
+    return;
+  }
+
+  if(msg.type === 'SYNC_DONE'){
+    // Guest receives the calculated offset
+    clockOffset = msg.offset;
+    syncDone = true;
+    return;
+  }
+
+  // ── Game Messages ──
+  if(msg.type === 'ROUND_START'){
+    // Guest receives: start the round
+    if(role === 'guest'){
+      STATE = 'holster';
+      holsterSince = 0;
+      didFire = false;
+      myMs = null;
+      theirMs = null;
+      hostReady = false;
+      guestReady = false;
+      show('pgGame');
+      $('app').style.background = '#080400';
+      showHolster();
+    }
+    return;
+  }
+
+  if(msg.type === 'READY'){
+    if(role === 'host'){
+      guestReady = true;
+      if(hostReady) checkBothReady();
+    } else {
+      hostReady = true;
+      if(guestReady) checkBothReady();
+    }
+  }
+
+  if(msg.type === 'DRAW'){
+    scheduleLocalDraw(msg.at);
+  }
+
+  if(msg.type === 'RESULT'){
+    theirMs = msg.ms;
+    tryResolveRound();
+  }
+
+  if(msg.type === 'EARLY'){
+    theirMs = 9999;
+    if(myMs === null){
+      myMs = 0;
+    }
+    tryResolveRound();
+  }
+
+  if(msg.type === 'ROUND_AGAIN'){
+    startRound();
+  }
+
+  if(msg.type === 'REMATCH'){
+    myScore = 0; theirScore = 0;
+    updateScores();
+    startRound();
+  }
+}
+
+/* ════ UI FLOW ════ */
+
+// CREATE ROOM
+$('btnCreate').addEventListener('click', ()=>{
+  ac();
+  startSensors();
+  myCode = makeCode();
+  role = 'host';
+
+  $('roomCode').textContent = myCode;
+  $('hostDot').className = 'status-dot';
+  $('hostStatus').textContent = 'Aguardando conexão...';
+  show('pgHost');
+
+  const p = initPeer('qdraw-' + myCode);
+  p.on('open', ()=>{
+    $('hostStatus').textContent = 'Sala aberta!';
+  });
+  p.on('connection', c =>{
+    conn = c;
+    conn.on('open', ()=>{
+      $('hostDot').className = 'status-dot green';
+      $('hostStatus').textContent = 'Rival conectado!';
+      vib([100, 50, 100]);
+      // Start game immediately — clock sync happens as part of startGame
+      setTimeout(startGame, 300);
+    });
+    conn.on('data', onMessage);
+    conn.on('close', onDisconnect);
+  });
+  p.on('error', err => {
+    $('hostStatus').textContent = 'Erro: ' + err.type + '. Tente novamente.';
+  });
+});
+
+// JOIN ROOM
+$('btnJoinOpen').addEventListener('click', ()=>{
+  show('pgJoin');
+  $('codeInput').value = '';
+  $('joinError').textContent = '';
+  $('codeInput').focus();
+});
+
+$('btnConnect').addEventListener('click', ()=>{
+  ac();
+  startSensors();
+  const code = $('codeInput').value.toUpperCase().trim();
+  if(code.length !== 4){ $('joinError').textContent = 'Código precisa ter 4 letras'; return; }
+  $('joinError').textContent = 'Conectando...';
+  role = 'guest';
+
+  // Single peer — fixed from original buggy triple-peer creation
+  const p = new Peer(null, {host: '0.peerjs.com', port: 443, path: '/', secure: true, debug: 0});
+  peer = p;
+  p.on('open', ()=>{
+    conn = p.connect('qdraw-' + code, {reliable: true});
+    conn.on('open', ()=>{
+      $('joinError').textContent = '';
+      vib([100, 50, 100]);
+      startGame();
+    });
+    conn.on('data', onMessage);
+    conn.on('error', ()=>{ $('joinError').textContent = 'Código inválido ou sala cheia'; });
+    conn.on('close', onDisconnect);
+  });
+  p.on('error', err =>{
+    if(err.type === 'peer-unavailable'){
+      $('joinError').textContent = 'Sala não encontrada. Verifica o código.';
+    } else {
+      $('joinError').textContent = 'Erro de conexão. Tenta de novo.';
+    }
+  });
+});
+
+// CANCEL
+$('btnCancelHost').addEventListener('click', ()=>{
+  if(peer) peer.destroy();
+  peer = null; conn = null; role = null;
+  show('pgMenu');
+});
+$('btnCancelJoin').addEventListener('click', ()=>{
+  if(peer) peer.destroy();
+  peer = null; conn = null; role = null;
+  show('pgMenu');
+});
+
+// Input uppercase
+$('codeInput').addEventListener('input', e =>{ e.target.value = e.target.value.toUpperCase(); });
+
+// Enter key to connect
+$('codeInput').addEventListener('keydown', e =>{
+  if(e.key === 'Enter') $('btnConnect').click();
+});
+
+function onDisconnect(){
+  STATE = 'idle';
+  clearTimeout(silentTimer);
+  $('app').style.background = '#080400';
+  show('pgGame');
+  setMid(`
+    <div class="icon-big">📵</div>
+    <div class="lbl-big" style="color:#e74c3c;font-size:24px">Rival desconectou</div>
+    <button class="btn btn-ghost" style="margin-top:20px;max-width:220px" onclick="backToMenu()">MENU</button>
+  `);
+}
+
+function backToMenu(){
+  STATE = 'idle';
+  clearTimeout(silentTimer);
+  if(peer) peer.destroy();
+  peer = null; conn = null; role = null;
+  clockOffset = 0; syncSamples = []; syncDone = false;
+  myScore = 0; theirScore = 0;
+  show('pgMenu');
+}
+</script>
+</body>
+</html>
