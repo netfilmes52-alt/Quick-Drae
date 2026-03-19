@@ -7,251 +7,279 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.2/peerjs.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Rye&family=Oswald:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
-/* ══════════════════════════════════════════
-   BASE
-══════════════════════════════════════════ */
+/* ═══════════════════════════════
+   RESET
+═══════════════════════════════ */
 *, *::before, *::after {
-  margin:0; padding:0; box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
-  user-select:none;
-  /* NEVER intercept touches globally — only on specific elements */
+  margin: 0; padding: 0; box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
-html,body {
-  width:100%; height:100%;
-  overflow:hidden;
-  background:#060300;
-  font-family:'Oswald',sans-serif;
-  color:#f5e6c8;
-  /* prevent scroll bounce */
-  overscroll-behavior:none;
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  font-family: 'Oswald', sans-serif;
+  color: #f5e6c8;
+  overscroll-behavior: none;
+  background: #060300;
 }
 
-/* ── PAGES ── */
+/* ═══════════════════════════════
+   PAGES
+═══════════════════════════════ */
 .pg {
-  position:fixed; inset:0;
-  display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  gap:22px; padding:36px 26px;
-  text-align:center;
-  opacity:0; pointer-events:none;
-  transition:opacity .3s;
+  position: fixed; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 20px; padding: 32px 24px;
+  text-align: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity .3s;
+  background: #060300;
 }
-.pg.on { opacity:1; pointer-events:all; }
+.pg.on { opacity: 1; pointer-events: all; }
 
-/* ── TYPOGRAPHY ── */
+/* ═══════════════════════════════
+   TYPOGRAPHY
+═══════════════════════════════ */
 .logo {
-  font-family:'Rye',cursive;
-  font-size:44px; color:#f0c040;
-  text-shadow:3px 3px 0 #2a0e00, 0 0 40px rgba(240,192,64,.4);
-  line-height:1.1;
+  font-family: 'Rye', cursive;
+  font-size: 44px; color: #f0c040;
+  text-shadow: 3px 3px 0 #2a0e00, 0 0 40px rgba(240,192,64,.45);
+  line-height: 1.1;
 }
 .logo-sub {
-  display:block; font-size:11px;
-  letter-spacing:7px; color:#2a1600;
-  font-family:'Oswald'; font-weight:300; margin-top:6px;
-}
-.lbl-big {
-  font-family:'Rye',cursive;
-  font-size:30px; letter-spacing:3px;
-  line-height:1.2;
-}
-.lbl-sm {
-  font-size:11px; letter-spacing:5px;
-  font-weight:300; color:#2a1800;
+  display: block; font-size: 11px;
+  letter-spacing: 7px; color: #2a1600;
+  font-family: 'Oswald'; font-weight: 300; margin-top: 6px;
 }
 
-/* ── BUTTONS (touch-action:manipulation prevents double-tap zoom but NOT game events) ── */
+/* ═══════════════════════════════
+   BUTTONS
+   touch-action:manipulation = no double-tap zoom, but pointer events work fine
+═══════════════════════════════ */
 .btn {
-  font-family:'Rye',cursive;
-  font-size:20px; letter-spacing:3px;
-  padding:15px 0; width:100%; max-width:260px;
-  border-radius:8px; cursor:pointer;
-  touch-action:manipulation;
+  font-family: 'Rye', cursive;
+  font-size: 20px; letter-spacing: 3px;
+  padding: 15px 0; width: 100%; max-width: 260px;
+  border-radius: 8px; cursor: pointer;
+  touch-action: manipulation;
+  border: none;
 }
 .btn-red {
-  background:linear-gradient(160deg,#7a0000,#b52020);
-  color:#f0c040; border:2.5px solid #f0c040;
-  box-shadow:0 6px 0 #380000;
+  background: linear-gradient(160deg, #7a0000, #b52020);
+  color: #f0c040; border: 2.5px solid #f0c040;
+  box-shadow: 0 6px 0 #380000;
 }
-.btn-red:active { transform:translateY(5px); box-shadow:0 1px 0 #380000; }
+.btn-red:active { transform: translateY(5px); box-shadow: 0 1px 0 #380000; }
 .btn-ghost {
-  background:transparent; color:rgba(240,192,64,.7);
-  border:2px solid rgba(240,192,64,.25);
+  background: transparent;
+  color: rgba(240,192,64,.7);
+  border: 2px solid rgba(240,192,64,.25);
 }
-.btn-ghost:active { background:rgba(240,192,64,.06); }
+.btn-ghost:active { background: rgba(240,192,64,.07); }
+.btn-sm {
+  font-family: 'Rye', cursive;
+  font-size: 16px; letter-spacing: 2px;
+  padding: 13px 0; width: 100%; max-width: 230px;
+  border-radius: 8px; cursor: pointer;
+  touch-action: manipulation;
+  background: transparent;
+  color: rgba(240,192,64,.55);
+  border: 1.5px solid rgba(240,192,64,.18);
+}
+.btn-sm:active { background: rgba(240,192,64,.07); color: #f0c040; }
 
-/* ── CARD ── */
+/* ═══════════════════════════════
+   CARD
+═══════════════════════════════ */
 .card {
-  background:rgba(255,255,255,.025);
-  border:1px solid rgba(240,192,64,.12);
-  border-radius:14px; padding:22px 20px;
-  width:100%; max-width:300px;
-  display:flex; flex-direction:column; gap:16px;
+  background: rgba(255,255,255,.025);
+  border: 1px solid rgba(240,192,64,.12);
+  border-radius: 14px; padding: 22px 20px;
+  width: 100%; max-width: 300px;
+  display: flex; flex-direction: column; gap: 16px;
 }
 
-/* ── MENU steps ── */
-.step { display:flex; align-items:center; gap:14px; text-align:left; }
-.step .i { font-size:26px; min-width:36px; text-align:center; }
-.step p   { font-size:13px; color:#6a4010; line-height:1.55; font-weight:300; }
-.step p b { color:#f0c040; font-weight:700; }
-
-/* ── INPUT ── */
-.code-input {
-  font-family:'Rye',cursive; font-size:38px;
-  letter-spacing:14px; text-align:center;
-  background:rgba(255,255,255,.04);
-  border:2px solid rgba(240,192,64,.25);
-  border-radius:10px; color:#f0c040;
-  padding:14px 10px; width:100%; max-width:220px;
-  outline:none; text-transform:uppercase;
-  touch-action:manipulation;
-}
-.code-input::placeholder { color:#2a1800; letter-spacing:8px; }
-
-/* ── ROOM CODE ── */
+/* ═══════════════════════════════
+   ROOM CODE / JOIN INPUT
+═══════════════════════════════ */
 .room-code {
-  font-family:'Rye',cursive; font-size:56px;
-  letter-spacing:16px; color:#f0c040;
-  text-shadow:0 0 30px rgba(240,192,64,.6);
+  font-family: 'Rye', cursive; font-size: 56px;
+  letter-spacing: 16px; color: #f0c040;
+  text-shadow: 0 0 30px rgba(240,192,64,.6);
 }
-.room-hint { font-size:11px; letter-spacing:4px; color:#3a2000; font-weight:300; }
+.room-hint { font-size: 11px; letter-spacing: 4px; color: #3a2000; font-weight: 300; }
+.code-input {
+  font-family: 'Rye', cursive; font-size: 38px;
+  letter-spacing: 14px; text-align: center;
+  background: rgba(255,255,255,.04);
+  border: 2px solid rgba(240,192,64,.25);
+  border-radius: 10px; color: #f0c040;
+  padding: 14px 10px; width: 100%; max-width: 220px;
+  outline: none; text-transform: uppercase;
+  touch-action: manipulation;
+}
+.code-input::placeholder { color: #2a1800; letter-spacing: 8px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: #e74c3c; display: inline-block; margin-right: 7px; }
+.dot.green { background: #2ecc71; }
+.dot.blink { animation: blink 1.2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
 
-/* ── STATUS DOT ── */
-.dot { width:9px; height:9px; border-radius:50%; background:#e74c3c; display:inline-block; margin-right:7px; }
-.dot.on { background:#2ecc71; }
-.dot.pulse { animation:dp 1.2s infinite; }
-@keyframes dp { 0%,100%{opacity:1} 50%{opacity:.25} }
-
-/* ══ GAME PAGE ══ */
+/* ═══════════════════════════════
+   GAME PAGE
+   NOTE: NO pointer-events:none here!
+   Sensors use window events (deviceorientation/devicemotion),
+   NOT pointer events. Buttons need pointer events to work.
+═══════════════════════════════ */
 #pgGame {
-  justify-content:space-between;
-  padding:44px 26px 50px;
-  gap:0;
-  /* CRITICAL: no pointer events on game page background — only sensor fires */
-  pointer-events:none;
+  justify-content: space-between;
+  padding: 44px 24px 50px;
+  gap: 0;
 }
-#pgGame.on { pointer-events:none; } /* intentional — no touch fires */
 
-.vs-bar { width:100%; display:flex; justify-content:space-between; align-items:center; }
-.pl-side { display:flex; flex-direction:column; gap:4px; }
-.pl-name { font-size:10px; letter-spacing:3px; color:#1a1000; font-weight:300; }
-.pl-sc { font-size:30px; font-weight:700; color:#2a1800; transition:color .3s; }
-.pl-sc.hi { color:#f0c040; }
-.vs-lbl { font-family:'Rye',cursive; font-size:14px; color:#1a1000; }
+/* Score bar */
+.vs-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; }
+.pl-side { display: flex; flex-direction: column; gap: 4px; }
+.pl-name { font-size: 10px; letter-spacing: 3px; color: #1a1000; font-weight: 300; }
+.pl-sc { font-size: 30px; font-weight: 700; color: #2a1800; transition: color .3s; }
+.pl-sc.hi { color: #f0c040; }
+.vs-lbl { font-family: 'Rye', cursive; font-size: 14px; color: #1a1000; }
 
+/* Mid area */
 .mid {
-  flex:1; display:flex; flex-direction:column;
-  align-items:center; justify-content:center; gap:14px;
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 14px;
 }
 
-/* ── GUN SVG WRAPPER ── */
+/* ═══════════════════════════════
+   GUN ANIMATION
+═══════════════════════════════ */
 .gun-scene {
-  position:relative;
-  width:220px; height:220px;
+  position: relative;
+  width: 220px; height: 220px;
+  pointer-events: none; /* gun visual never intercepts touches */
 }
+
 .gun-svg {
-  width:220px; height:220px;
-  transform-origin:center center;
-  transition:transform .15s ease-out;
-  /* holstered = pointing down */
-}
-.gun-svg.holstered  { transform:rotate(90deg); }
-.gun-svg.waiting    { transform:rotate(90deg); }
-.gun-svg.ready      { transform:rotate(75deg); animation:gun-tremble .08s infinite alternate; }
-.gun-svg.fired      { transform:rotate(-20deg); animation:gun-recoil .25s forwards; }
-.gun-svg.drawn      { transform:rotate(0deg); }
-
-@keyframes gun-tremble {
-  from { transform:rotate(73deg) translateX(-1px); }
-  to   { transform:rotate(77deg) translateX(1px); }
-}
-@keyframes gun-recoil {
-  0%   { transform:rotate(0deg) translateY(0); }
-  25%  { transform:rotate(-28deg) translateY(-18px); }
-  60%  { transform:rotate(-10deg) translateY(-6px); }
-  100% { transform:rotate(-15deg) translateY(-4px); }
+  width: 220px; height: 220px;
+  transform-origin: center center;
+  will-change: transform;
 }
 
-/* Muzzle flash */
-.muzzle {
-  position:absolute;
-  top:32%; right:-18px;
-  width:50px; height:50px;
-  pointer-events:none;
-  opacity:0;
+/* States via class */
+.gun-svg.st-holster { transform: rotate(90deg); transition: transform .3s ease-out; }
+.gun-svg.st-waiting { transform: rotate(90deg); transition: transform .3s ease-out; }
+.gun-svg.st-draw    { transform: rotate(0deg);  transition: transform .2s ease-out; }
+.gun-svg.st-fired   { transform: rotate(-18deg) translateY(-6px); animation: recoil .3s forwards; }
+.gun-svg.st-early   { transform: rotate(90deg); transition: transform .3s ease-out; }
+
+@keyframes recoil {
+  0%   { transform: rotate(0deg)   translateY(0);     }
+  20%  { transform: rotate(-30deg) translateY(-22px); }
+  55%  { transform: rotate(-12deg) translateY(-8px);  }
+  100% { transform: rotate(-18deg) translateY(-5px);  }
 }
-.muzzle.bang { animation:muzzle-anim .2s forwards; }
-@keyframes muzzle-anim {
-  0%   { opacity:1; transform:scale(.5) rotate(0deg); }
-  40%  { opacity:1; transform:scale(1.4) rotate(15deg); }
-  100% { opacity:0; transform:scale(2) rotate(30deg); }
+
+/* Muzzle flash — absolute inside .gun-scene */
+.muzzle-flash {
+  position: absolute;
+  width: 60px; height: 60px;
+  top: 28%; right: -16px;
+  pointer-events: none;
+  opacity: 0;
+  transform-origin: center;
+}
+.muzzle-flash.fire {
+  animation: muzzle .22s forwards;
+}
+@keyframes muzzle {
+  0%   { opacity: 1; transform: scale(.4) rotate(0deg); }
+  35%  { opacity: 1; transform: scale(1.3) rotate(20deg); }
+  100% { opacity: 0; transform: scale(1.8) rotate(40deg); }
 }
 
 /* Smoke puff */
 .smoke {
-  position:absolute; top:28%; right:-10px;
-  width:30px; height:30px;
-  border-radius:50%;
-  background:radial-gradient(circle, rgba(200,180,140,.6), transparent);
-  pointer-events:none; opacity:0;
+  position: absolute;
+  width: 28px; height: 28px;
+  top: 26%; right: 2px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(210,190,150,.7), transparent 70%);
+  pointer-events: none;
+  opacity: 0;
 }
-.smoke.puff { animation:smoke-anim .8s forwards; }
-@keyframes smoke-anim {
-  0%   { opacity:.7; transform:scale(.3) translate(0,0); }
-  50%  { opacity:.4; transform:scale(1.2) translate(10px,-15px); }
-  100% { opacity:0;  transform:scale(2)   translate(20px,-40px); }
-}
-
-/* Chip */
-.chip {
-  background:rgba(255,255,255,.03);
-  border:1px solid rgba(240,192,64,.12);
-  border-radius:20px; padding:7px 16px;
-  font-size:11px; letter-spacing:3px; color:#2a1800; font-weight:300;
+.smoke.puff { animation: smoke-go .9s forwards; }
+@keyframes smoke-go {
+  0%   { opacity: .8; transform: scale(.3) translate(0, 0); }
+  40%  { opacity: .4; transform: scale(1.1) translate(8px, -12px); filter: blur(2px); }
+  100% { opacity: 0;  transform: scale(2.2) translate(18px, -36px); filter: blur(6px); }
 }
 
-/* Result numbers */
-.ms-num  { font-size:82px; font-weight:700; letter-spacing:-3px; line-height:1; }
-.ms-unit { font-size:17px; font-weight:300; color:#3a2000; letter-spacing:2px; margin-left:3px; }
-.ms-rank { font-family:'Rye',cursive; font-size:20px; }
+/* Status text */
+.st-big {
+  font-family: 'Rye', cursive;
+  font-size: 30px; letter-spacing: 3px;
+  line-height: 1.2; text-align: center;
+  min-height: 40px;
+  transition: color .15s;
+}
+.st-sm {
+  font-size: 11px; letter-spacing: 5px;
+  font-weight: 300; text-align: center;
+  min-height: 16px;
+}
+
+/* Result area */
+.result-area {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.ms-big  { font-size: 84px; font-weight: 700; letter-spacing: -3px; line-height: 1; }
+.ms-unit { font-size: 17px; font-weight: 300; color: #3a2000; letter-spacing: 2px; margin-left: 3px; }
+.ms-rank { font-family: 'Rye', cursive; font-size: 20px; }
 
 /* History bars */
-.hist { display:flex; gap:7px; align-items:flex-end; height:44px; justify-content:center; }
-.hb   { display:flex; flex-direction:column; align-items:center; gap:3px; }
-.hbar { width:24px; border-radius:3px 3px 0 0; min-height:4px; background:rgba(240,192,64,.18); }
-.hbar.best { background:rgba(46,204,113,.75); }
-.hbar.last { background:rgba(240,192,64,.75); }
-.hval { font-size:8px; color:#2a1800; }
+.hist-row { display: flex; gap: 7px; align-items: flex-end; height: 44px; justify-content: center; }
+.hb       { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.hb-bar   { width: 24px; border-radius: 3px 3px 0 0; min-height: 4px; background: rgba(240,192,64,.18); }
+.hb-bar.is-best { background: rgba(46,204,113,.8); }
+.hb-bar.is-last { background: rgba(240,192,64,.8); }
+.hb-val   { font-size: 8px; color: #2a1800; }
 
-/* Next round btn - touch-action:manipulation so it can be tapped */
-.btn-next {
-  font-family:'Rye',cursive; font-size:17px; letter-spacing:2px;
-  padding:13px 0; width:100%; max-width:230px;
-  background:transparent; color:rgba(240,192,64,.6);
-  border:1.5px solid rgba(240,192,64,.2);
-  border-radius:8px; cursor:pointer;
-  touch-action:manipulation;
-  pointer-events:all;
+/* Bottom chip */
+.chip {
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(240,192,64,.1);
+  border-radius: 20px; padding: 7px 16px;
+  font-size: 11px; letter-spacing: 3px;
+  color: #2a1800; font-weight: 300;
+  min-height: 32px;
 }
-.btn-next:active { background:rgba(240,192,64,.07); }
 
-/* ── OVERLAYS ── */
+/* ═══════════════════════════════
+   OVERLAYS
+═══════════════════════════════ */
 #ovFlash {
-  position:fixed; inset:0; z-index:999;
-  pointer-events:none; opacity:0;
-  background:rgba(255,240,160,.75);
+  position: fixed; inset: 0; z-index: 999;
+  pointer-events: none; opacity: 0;
+  background: rgba(255,240,150,.75);
 }
-#ovFlash.go { animation:fl .35s forwards; }
+#ovFlash.go { animation: fl .35s forwards; }
 @keyframes fl { 0%{opacity:1} 100%{opacity:0} }
 
 #ovRed {
-  position:fixed; inset:0; z-index:998;
-  pointer-events:none; opacity:0;
+  position: fixed; inset: 0; z-index: 998;
+  pointer-events: none; opacity: 0;
 }
-#ovRed.go { animation:rd .5s forwards; }
-@keyframes rd { 0%{opacity:1;background:rgba(200,20,0,.3)} 100%{opacity:0;background:transparent} }
+#ovRed.go { animation: rd .5s forwards; }
+@keyframes rd { 0%{opacity:1; background:rgba(200,20,0,.3)} 100%{opacity:0; background:transparent} }
 
-#pcv { position:fixed; inset:0; pointer-events:none; z-index:900; }
+/* particle canvas */
+#pcv { position: fixed; inset: 0; pointer-events: none; z-index: 900; }
 </style>
 </head>
 <body>
@@ -260,34 +288,34 @@ html,body {
 <div id="ovFlash"></div>
 <div id="ovRed"></div>
 
-<!-- ════ MENU ════ -->
-<div class="pg on" id="pgMenu" style="background:#060300">
-  <div class="logo">Quick Draw<span class="logo-sub">Duelo de Pistoleiros</span></div>
-  <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:260px;align-items:center">
+<!-- ════════════ MENU ════════════ -->
+<div class="pg on" id="pgMenu">
+  <div class="logo">Quick Draw<span class="logo-sub">Pistoleiros</span></div>
+  <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:250px;align-items:center">
     <button class="btn btn-red"   id="btnPratica">🎯 MODO PRÁTICA</button>
-    <button class="btn btn-red"   id="btnCreate" style="font-size:17px">⚔️ CRIAR DUELO ONLINE</button>
-    <button class="btn btn-ghost" id="btnJoinOpen" style="font-size:17px">🔗 ENTRAR NA SALA</button>
+    <button class="btn btn-red"   id="btnCreate"  style="font-size:16px">⚔️ CRIAR DUELO ONLINE</button>
+    <button class="btn btn-ghost" id="btnJoinOpen" style="font-size:16px">🔗 ENTRAR NA SALA</button>
   </div>
 </div>
 
-<!-- ════ HOST LOBBY ════ -->
-<div class="pg" id="pgHost" style="background:#060300">
-  <div class="logo" style="font-size:30px">Sua Sala</div>
+<!-- ════════════ HOST LOBBY ════════════ -->
+<div class="pg" id="pgHost">
+  <div class="logo" style="font-size:28px">Sua Sala</div>
   <div class="card" style="align-items:center;gap:18px">
     <div class="room-hint">CÓDIGO DA SALA</div>
     <div class="room-code" id="roomCode">----</div>
     <div class="room-hint">Manda pro seu amigo</div>
     <div style="display:flex;align-items:center;gap:8px">
-      <span class="dot pulse" id="hostDot"></span>
-      <span style="font-size:12px;color:#3a2000;letter-spacing:2px" id="hostStatus">Conectando...</span>
+      <span class="dot blink" id="hostDot"></span>
+      <span style="font-size:12px;color:#3a2000;letter-spacing:1px" id="hostStatus">Abrindo sala...</span>
     </div>
   </div>
   <button class="btn btn-ghost" id="btnCancelHost">CANCELAR</button>
 </div>
 
-<!-- ════ JOIN LOBBY ════ -->
-<div class="pg" id="pgJoin" style="background:#060300">
-  <div class="logo" style="font-size:30px">Entrar na Sala</div>
+<!-- ════════════ JOIN LOBBY ════════════ -->
+<div class="pg" id="pgJoin">
+  <div class="logo" style="font-size:28px">Entrar na Sala</div>
   <div class="card" style="align-items:center;gap:14px">
     <div class="room-hint">CÓDIGO DE 4 LETRAS</div>
     <input class="code-input" id="codeInput" maxlength="4" placeholder="XXXX" autocomplete="off" spellcheck="false" inputmode="text">
@@ -297,852 +325,839 @@ html,body {
   <button class="btn btn-ghost" id="btnCancelJoin">VOLTAR</button>
 </div>
 
-<!-- ════ GAME ════ -->
+<!-- ════════════ GAME ════════════ -->
 <div class="pg" id="pgGame">
 
   <div class="vs-bar">
     <div class="pl-side">
-      <div class="pl-name" id="myNameLbl">VOCÊ</div>
-      <div class="pl-sc" id="myScoreEl">0</div>
+      <div class="pl-name" id="myName">VOCÊ</div>
+      <div class="pl-sc"   id="myScEl">0</div>
     </div>
-    <div class="vs-lbl" id="vsLbl">VS</div>
+    <div class="vs-lbl" id="vsLbl">·</div>
     <div class="pl-side" style="text-align:right">
-      <div class="pl-name" id="theirNameLbl">RIVAL</div>
-      <div class="pl-sc" id="theirScoreEl">0</div>
+      <div class="pl-name" id="theirName">RECORDE</div>
+      <div class="pl-sc"   id="theirScEl">—</div>
     </div>
   </div>
 
-  <!-- GUN SCENE -->
   <div class="mid">
+
+    <!-- Gun visual -->
     <div class="gun-scene">
-      <!-- Animated SVG revolver -->
-      <svg class="gun-svg holstered" id="gunSvg" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+      <svg class="gun-svg st-holster" id="gunSvg" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
         <!-- Barrel -->
-        <rect x="108" y="66" width="88" height="24" rx="7" fill="#2a2a2a"/>
-        <!-- Muzzle end -->
-        <rect x="172" y="62" width="26" height="32" rx="5" fill="#1a1a1a"/>
-        <!-- Barrel top groove -->
-        <rect x="112" y="69" width="60" height="5" rx="2" fill="#444" opacity=".5"/>
-        <!-- Sight -->
-        <rect x="108" y="62" width="10" height="6" rx="1.5" fill="#555"/>
+        <rect x="106" y="66" width="90" height="23" rx="7" fill="#2a2a2a"/>
+        <!-- Muzzle block -->
+        <rect x="170" y="61" width="28" height="33" rx="5" fill="#1a1a1a"/>
+        <!-- Barrel rib -->
+        <rect x="110" y="69" width="58" height="5" rx="2" fill="#3e3e3e" opacity=".7"/>
+        <!-- Front sight -->
+        <rect x="106" y="61" width="10" height="7" rx="1.5" fill="#555"/>
         <!-- Cylinder -->
-        <circle cx="114" cy="92" r="29" fill="#363636"/>
-        <circle cx="114" cy="92" r="22" fill="#282828"/>
-        <circle cx="114" cy="92" r="7"  fill="#1a1a1a"/>
-        <!-- Cylinder holes -->
-        <circle cx="114" cy="74" r="5" fill="#444"/>
-        <circle cx="114" cy="110" r="5" fill="#444"/>
-        <circle cx="97"  cy="83" r="5" fill="#444"/>
-        <circle cx="97"  cy="101" r="5" fill="#444"/>
-        <circle cx="131" cy="83" r="5" fill="#444"/>
-        <circle cx="131" cy="101" r="5" fill="#444"/>
-        <!-- Ejector rod -->
-        <rect x="96" y="112" width="4" height="16" rx="2" fill="#555"/>
+        <circle cx="112" cy="92" r="29" fill="#383838"/>
+        <circle cx="112" cy="92" r="22" fill="#2a2a2a"/>
+        <circle cx="112" cy="92" r="7"  fill="#1a1a1a"/>
+        <!-- Cylinder chambers -->
+        <circle cx="112" cy="73" r="5.5" fill="#444"/>
+        <circle cx="112" cy="111" r="5.5" fill="#444"/>
+        <circle cx="94"  cy="82" r="5.5" fill="#444"/>
+        <circle cx="94"  cy="102" r="5.5" fill="#444"/>
+        <circle cx="130" cy="82" r="5.5" fill="#444"/>
+        <circle cx="130" cy="102" r="5.5" fill="#444"/>
+        <!-- Ejector rod housing -->
+        <rect x="94" y="113" width="5" height="18" rx="2.5" fill="#555"/>
         <!-- Trigger guard -->
-        <path d="M96 96 Q78 122 95 130 L110 130 L110 96Z" fill="#2a2a2a"/>
-        <ellipse cx="87" cy="118" rx="6" ry="7" fill="none" stroke="#1a1a1a" stroke-width="2.5"/>
+        <path d="M94 96 Q75 124 93 132 L109 132 L109 96Z" fill="#2a2a2a"/>
+        <ellipse cx="85" cy="120" rx="6" ry="7.5" fill="none" stroke="#1a1a1a" stroke-width="3"/>
         <!-- Trigger -->
-        <rect x="93" y="97" width="5" height="24" rx="2.5" fill="#c8a000" transform="rotate(8,95.5,109)"/>
+        <rect x="91" y="97" width="5" height="26" rx="2.5" fill="#c8a000" transform="rotate(9,93.5,110)"/>
+        <!-- Rear frame / hammer area -->
+        <rect x="88" y="63" width="15" height="22" rx="3.5" fill="#222"/>
         <!-- Hammer -->
-        <rect x="90" y="64" width="14" height="20" rx="3.5" fill="#222"/>
-        <rect x="92" y="60" width="10" height="8" rx="2" fill="#1a1a1a"/>
+        <rect x="90" y="57" width="11" height="10" rx="2.5" fill="#1a1a1a"/>
         <!-- Grip -->
-        <path d="M94 108 Q78 115 74 142 Q72 160 86 163 L112 157 L110 108Z" fill="#4a2810"/>
-        <path d="M94 108 Q81 118 78 140 Q76 155 88 160 L110 155 L110 108Z" fill="#6b3d18"/>
-        <!-- Grip texture lines -->
-        <line x1="81" y1="126" x2="107" y2="122" stroke="#3a1f08" stroke-width="1.5"/>
-        <line x1="79" y1="135" x2="107" y2="131" stroke="#3a1f08" stroke-width="1.5"/>
-        <line x1="78" y1="144" x2="107" y2="140" stroke="#3a1f08" stroke-width="1.5"/>
+        <path d="M92 108 Q76 116 72 144 Q70 163 85 165 L111 159 L109 108Z" fill="#4a2810"/>
+        <path d="M92 108 Q79 119 76 142 Q74 158 87 162 L109 157 L109 108Z" fill="#6b3d18"/>
+        <!-- Grip checkering -->
+        <line x1="79" y1="127" x2="106" y2="123" stroke="#3a1f08" stroke-width="1.5"/>
+        <line x1="77" y1="136" x2="106" y2="132" stroke="#3a1f08" stroke-width="1.5"/>
+        <line x1="76" y1="145" x2="105" y2="141" stroke="#3a1f08" stroke-width="1.5"/>
         <!-- Grip screw -->
-        <circle cx="98" cy="133" r="3" fill="#2a1505"/>
-        <line x1="96" y1="133" x2="100" y2="133" stroke="#555" stroke-width="1"/>
-        <!-- Gold accents -->
-        <rect x="90" y="82" width="4" height="2" rx="1" fill="#c8a000" opacity=".6"/>
+        <circle cx="97" cy="135" r="3.5" fill="#2a1505"/>
+        <line   x1="95" y1="135" x2="99" y2="135" stroke="#555" stroke-width="1.2"/>
+        <!-- Gold trigger guard accent -->
+        <path d="M94 96 Q75 124 93 132" fill="none" stroke="#c8a000" stroke-width="1" opacity=".4"/>
+        <!-- Barrel shine -->
+        <rect x="115" y="70" width="50" height="2" rx="1" fill="#666" opacity=".5"/>
       </svg>
-      <!-- Muzzle flash SVG overlay -->
-      <svg class="muzzle" id="muzzleSvg" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="25" cy="25" r="20" fill="#ffdd00" opacity=".95"/>
-        <circle cx="25" cy="25" r="12" fill="#fff"/>
-        <circle cx="25" cy="25" r="6"  fill="#ffaa00"/>
-        <!-- Rays -->
-        <line x1="25" y1="2"  x2="25" y2="-6" stroke="#ffdd00" stroke-width="3" stroke-linecap="round"/>
-        <line x1="44" y1="14" x2="52" y2="9"  stroke="#ffdd00" stroke-width="3" stroke-linecap="round"/>
-        <line x1="44" y1="36" x2="52" y2="41" stroke="#ffdd00" stroke-width="3" stroke-linecap="round"/>
-        <line x1="25" y1="48" x2="25" y2="56" stroke="#ffdd00" stroke-width="3" stroke-linecap="round"/>
-        <line x1="6"  y1="36" x2="-2" y2="41" stroke="#ffdd00" stroke-width="3" stroke-linecap="round"/>
-        <line x1="6"  y1="14" x2="-2" y2="9"  stroke="#ffdd00" stroke-width="3" stroke-linecap="round"/>
+
+      <!-- Muzzle flash SVG -->
+      <svg class="muzzle-flash" id="muzzleEl" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="30" cy="30" r="22" fill="#ffdd00" opacity=".95"/>
+        <circle cx="30" cy="30" r="14" fill="#fff9"/>
+        <circle cx="30" cy="30" r="7"  fill="#ffaa00"/>
+        <line x1="30" y1="4"  x2="30" y2="-4" stroke="#ffdd00" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="52" y1="17" x2="60" y2="12" stroke="#ffdd00" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="52" y1="43" x2="60" y2="48" stroke="#ffdd00" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="30" y1="56" x2="30" y2="64" stroke="#ffdd00" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="8"  y1="43" x2="0"  y2="48" stroke="#ffdd00" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="8"  y1="17" x2="0"  y2="12" stroke="#ffdd00" stroke-width="3.5" stroke-linecap="round"/>
       </svg>
+
       <!-- Smoke -->
-      <div class="smoke" id="smokePuff"></div>
+      <div class="smoke" id="smokeEl"></div>
     </div>
 
-    <!-- Status text injected here -->
-    <div id="statusLbl" class="lbl-big" style="color:#1a1000;min-height:42px"></div>
-    <div id="statusSub" class="lbl-sm" style="min-height:16px"></div>
+    <!-- Status labels -->
+    <div class="st-big" id="stBig" style="color:#2a1600">Aponta pra baixo</div>
+    <div class="st-sm"  id="stSm"  style="color:#1a1000">SEGURA NA CINTURA</div>
 
-    <!-- Reaction time + rank -->
-    <div id="resultArea" style="display:none;flex-direction:column;align-items:center;gap:8px">
-      <div class="ms-num" id="msNum"></div>
-      <div class="ms-rank" id="msRank"></div>
-      <div class="hist" id="histEl"></div>
+    <!-- Result (hidden until fired) -->
+    <div class="result-area" id="resultArea">
+      <div class="ms-big" id="msNumEl"></div>
+      <div class="ms-rank" id="msRankEl"></div>
+      <div class="hist-row" id="histRow"></div>
     </div>
 
-    <!-- Buttons rendered inside game (pointer-events:all explicit) -->
-    <button class="btn-next" id="btnNext" style="display:none" onclick="onNextBtn()">PRÓXIMA RODADA →</button>
-    <button class="btn-next" id="btnMenu" style="display:none;margin-top:4px" onclick="backToMenu()">← MENU</button>
+    <!-- Action buttons (always visible when needed, touch-action:manipulation) -->
+    <button class="btn-sm" id="btnNext" style="display:none" onclick="onBtnNext()">DE NOVO →</button>
+    <button class="btn-sm" id="btnBack" style="display:none;margin-top:4px;color:rgba(240,192,64,.35)" onclick="onBtnBack()">← MENU</button>
+
   </div>
 
-  <div class="chip" id="chipBottom"></div>
+  <div class="chip" id="chipBot">🎯 MODO PRÁTICA</div>
+
 </div>
 
 <script>
-'use strict';
-
-/* ════════════════════════════════════════════════════
+/* ══════════════════════════════════════
    PARTICLES
-════════════════════════════════════════════════════ */
-const pcv=document.getElementById('pcv'),pctx=pcv.getContext('2d');
-pcv.width=innerWidth;pcv.height=innerHeight;
-addEventListener('resize',()=>{pcv.width=innerWidth;pcv.height=innerHeight;});
-const PTS=[];
-function spawnPts(x,y,col,n){
-  for(let i=0;i<n;i++) PTS.push({
-    x,y,vx:(Math.random()-.5)*15,vy:(Math.random()-2.2)*11,
-    a:1,r:Math.random()*6+2,col
+══════════════════════════════════════ */
+const CV = document.getElementById('pcv');
+const CX = CV.getContext('2d');
+CV.width = innerWidth; CV.height = innerHeight;
+addEventListener('resize', () => { CV.width = innerWidth; CV.height = innerHeight; });
+const PARTS = [];
+function spawnParts(x, y, col, n) {
+  for (let i = 0; i < n; i++) PARTS.push({
+    x, y,
+    vx: (Math.random() - .5) * 16,
+    vy: (Math.random() - 2.2) * 11,
+    a: 1, r: Math.random() * 6 + 2, col
   });
 }
-(function animPts(){
-  pctx.clearRect(0,0,pcv.width,pcv.height);
-  for(let i=PTS.length-1;i>=0;i--){
-    const p=PTS[i];p.x+=p.vx;p.y+=p.vy;p.vy+=.42;p.a-=.02;
-    if(p.a<=0){PTS.splice(i,1);continue;}
-    pctx.globalAlpha=p.a;pctx.fillStyle=p.col;
-    pctx.beginPath();pctx.arc(p.x,p.y,p.r,0,Math.PI*2);pctx.fill();
+(function drawParts() {
+  CX.clearRect(0, 0, CV.width, CV.height);
+  for (let i = PARTS.length - 1; i >= 0; i--) {
+    const p = PARTS[i];
+    p.x += p.vx; p.y += p.vy; p.vy += .42; p.a -= .02;
+    if (p.a <= 0) { PARTS.splice(i, 1); continue; }
+    CX.globalAlpha = p.a; CX.fillStyle = p.col;
+    CX.beginPath(); CX.arc(p.x, p.y, p.r, 0, Math.PI * 2); CX.fill();
   }
-  pctx.globalAlpha=1;requestAnimationFrame(animPts);
+  CX.globalAlpha = 1;
+  requestAnimationFrame(drawParts);
 })();
 
-/* ════════════════════════════════════════════════════
+/* ══════════════════════════════════════
    AUDIO
-════════════════════════════════════════════════════ */
-let AC;
-function ensureAC(){if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)();}
+══════════════════════════════════════ */
+let AC = null;
+function initAC() {
+  if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)();
+}
 
-function playSignal(){
-  ensureAC();
-  // Sharp double beep — the draw signal
-  [[1100,.95],[600,.7,.07]].forEach(([freq,vol,del=0])=>{
-    const o=AC.createOscillator(),g=AC.createGain();
-    o.connect(g);g.connect(AC.destination);
-    o.type='square';o.frequency.value=freq;
-    const t=AC.currentTime+del;
-    g.gain.setValueAtTime(vol,t);
-    g.gain.exponentialRampToValueAtTime(.001,t+.18);
-    o.start(t);o.stop(t+.2);
+function sndSignal() {
+  initAC();
+  // High beep + mid beep — clear "GO" sound
+  [[1100, .9, 0], [650, .7, .06]].forEach(([freq, vol, del]) => {
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.connect(g); g.connect(AC.destination);
+    o.type = 'square'; o.frequency.value = freq;
+    const t = AC.currentTime + del;
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(.001, t + .17);
+    o.start(t); o.stop(t + .2);
   });
 }
 
-function playGunshot(){
-  ensureAC();
-  // Noise burst
-  const buf=AC.createBuffer(1,AC.sampleRate*.7,AC.sampleRate);
-  const d=buf.getChannelData(0);
-  for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/AC.sampleRate*10)*(i<300?i/300:1);
-  const s=AC.createBufferSource(),g=AC.createGain(),f=AC.createBiquadFilter();
-  f.type='lowpass';f.frequency.value=680;g.gain.value=1.0;
-  s.buffer=buf;s.connect(f);f.connect(g);g.connect(AC.destination);s.start();
+function sndGunshot() {
+  initAC();
+  // White noise burst
+  const buf = AC.createBuffer(1, AC.sampleRate * .7, AC.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++)
+    d[i] = (Math.random() * 2 - 1) * Math.exp(-i / AC.sampleRate * 10) * (i < 300 ? i / 300 : 1);
+  const s = AC.createBufferSource(), gn = AC.createGain(), f = AC.createBiquadFilter();
+  f.type = 'lowpass'; f.frequency.value = 700; gn.gain.value = 1.0;
+  s.buffer = buf; s.connect(f); f.connect(gn); gn.connect(AC.destination); s.start();
   // Low boom
-  const o=AC.createOscillator(),og=AC.createGain();
-  o.connect(og);og.connect(AC.destination);
-  o.type='sawtooth';o.frequency.value=75;
-  og.gain.setValueAtTime(.65,AC.currentTime);
-  og.gain.exponentialRampToValueAtTime(.001,AC.currentTime+.45);
-  o.start();o.stop(AC.currentTime+.5);
+  const o = AC.createOscillator(), og = AC.createGain();
+  o.connect(og); og.connect(AC.destination);
+  o.type = 'sawtooth'; o.frequency.value = 75;
+  og.gain.setValueAtTime(.65, AC.currentTime);
+  og.gain.exponentialRampToValueAtTime(.001, AC.currentTime + .45);
+  o.start(); o.stop(AC.currentTime + .5);
 }
 
-function playCheat(){
-  ensureAC();
-  [200,140,100].forEach((f,i)=>{
-    const o=AC.createOscillator(),g=AC.createGain();
-    o.connect(g);g.connect(AC.destination);
-    o.type='sawtooth';o.frequency.value=f;
-    const t=AC.currentTime+i*.12;
-    g.gain.setValueAtTime(.5,t);
-    g.gain.exponentialRampToValueAtTime(.001,t+.15);
-    o.start(t);o.stop(t+.18);
+function sndReady() {
+  initAC();
+  [440, 550, 660].forEach((f, i) => {
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.connect(g); g.connect(AC.destination);
+    o.type = 'sine'; o.frequency.value = f;
+    const t = AC.currentTime + i * .1;
+    g.gain.setValueAtTime(.22, t);
+    g.gain.exponentialRampToValueAtTime(.001, t + .1);
+    o.start(t); o.stop(t + .13);
   });
 }
 
-function playReady(){
-  ensureAC();
-  [440,550,660].forEach((f,i)=>{
-    const o=AC.createOscillator(),g=AC.createGain();
-    o.connect(g);g.connect(AC.destination);
-    o.type='sine';o.frequency.value=f;
-    const t=AC.currentTime+i*.1;
-    g.gain.setValueAtTime(.25,t);
-    g.gain.exponentialRampToValueAtTime(.001,t+.1);
-    o.start(t);o.stop(t+.12);
+function sndCheat() {
+  initAC();
+  [200, 150, 100].forEach((f, i) => {
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.connect(g); g.connect(AC.destination);
+    o.type = 'sawtooth'; o.frequency.value = f;
+    const t = AC.currentTime + i * .1;
+    g.gain.setValueAtTime(.5, t);
+    g.gain.exponentialRampToValueAtTime(.001, t + .12);
+    o.start(t); o.stop(t + .15);
   });
 }
 
-/* ════════════════════════════════════════════════════
+/* ══════════════════════════════════════
    VIBRATION
-════════════════════════════════════════════════════ */
-function vibrate(ms){ try{ navigator.vibrate&&navigator.vibrate(ms); }catch(e){} }
+══════════════════════════════════════ */
+function vib(p) { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} }
 
-/* ════════════════════════════════════════════════════
-   DOM HELPERS
-════════════════════════════════════════════════════ */
-const $=id=>document.getElementById(id);
-const ALL_PAGES=['pgMenu','pgHost','pgJoin','pgGame'];
-
-function showPage(id){
-  ALL_PAGES.forEach(p=>$(p).classList.toggle('on',p===id));
-  document.body.style.background = id==='pgGame' ? '#060300' : '#060300';
+/* ══════════════════════════════════════
+   DOM SHORTCUTS
+══════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+const PAGES = ['pgMenu', 'pgHost', 'pgJoin', 'pgGame'];
+function showPage(id) {
+  PAGES.forEach(p => $(p).classList.toggle('on', p === id));
 }
 
-function flash(){
-  const e=$('ovFlash');e.className='';
-  requestAnimationFrame(()=>e.className='go');
-}
-function redFlash(){
-  const e=$('ovRed');e.className='';
-  requestAnimationFrame(()=>e.className='go');
+function flash()    { const e=$('ovFlash'); e.className=''; requestAnimationFrame(() => e.className='go'); }
+function redFlash() { const e=$('ovRed');   e.className=''; requestAnimationFrame(() => e.className='go'); }
+
+/* ══════════════════════════════════════
+   GUN STATES
+══════════════════════════════════════ */
+function setGun(st) {
+  $('gunSvg').className = 'gun-svg st-' + st;
 }
 
-/* ════════════════════════════════════════════════════
-   GUN ANIMATION
-════════════════════════════════════════════════════ */
-function gunState(state){
-  const g=$('gunSvg');
-  g.className='gun-svg '+state;
+function doMuzzleFlash() {
+  const m = $('muzzleEl');
+  m.className = 'muzzle-flash';
+  requestAnimationFrame(() => {
+    m.className = 'muzzle-flash fire';
+    setTimeout(() => m.className = 'muzzle-flash', 280);
+  });
+  const s = $('smokeEl');
+  s.className = 'smoke';
+  setTimeout(() => {
+    s.className = 'smoke puff';
+    setTimeout(() => s.className = 'smoke', 950);
+  }, 40);
+  // Particles from muzzle
+  const rect = $('gunSvg').getBoundingClientRect();
+  const mx = rect.left + rect.width * .9;
+  const my = rect.top  + rect.height * .32;
+  spawnParts(mx, my, '#ffdd00', 14);
+  spawnParts(mx, my, '#ff8800', 8);
+  spawnParts(mx, my, '#ffffff', 4);
 }
 
-function fireGunAnim(){
-  gunState('fired');
-  // Muzzle flash
-  const m=$('muzzleSvg');
-  m.className='muzzle bang';
-  setTimeout(()=>m.className='muzzle',300);
-  // Smoke
-  const s=$('smokePuff');
-  s.className='smoke puff';
-  setTimeout(()=>s.className='smoke',900);
-  // Particles from muzzle area
-  const rect=$('gunSvg').getBoundingClientRect();
-  spawnPts(rect.right-20, rect.top+rect.height*.35, '#ffdd00', 14);
-  spawnPts(rect.right-20, rect.top+rect.height*.35, '#ff8800', 8);
-  spawnPts(rect.right-20, rect.top+rect.height*.35, '#fff',    4);
+/* ══════════════════════════════════════
+   STATUS LABELS
+══════════════════════════════════════ */
+function setLabel(big, sm, col = '#2a1600') {
+  $('stBig').textContent = big;
+  $('stBig').style.color = col;
+  $('stBig').style.textShadow = col === '#f0c040' ? '0 0 24px #f0c040' : '';
+  $('stSm').textContent = sm;
+}
+function showResultArea(show) {
+  $('resultArea').style.display = show ? 'flex' : 'none';
+}
+function showBtn(id, show) {
+  $(id).style.display = show ? 'block' : 'none';
 }
 
-/* ════════════════════════════════════════════════════
-   STATUS HELPERS
-════════════════════════════════════════════════════ */
-function setStatus(big, sub='', col='#1a1000'){
-  $('statusLbl').textContent=big;
-  $('statusLbl').style.color=col;
-  $('statusSub').textContent=sub;
-}
-function showResult(ms, rank, isBest){
-  $('resultArea').style.display='flex';
-  const col=ms<150?'#2ecc71':ms<250?'#f0c040':ms<400?'#ff8800':'#e74c3c';
-  $('msNum').innerHTML=`<span style="color:${col}">${ms}</span><span class="ms-unit">ms</span>`;
-  $('msRank').textContent=rank+(isBest&&HISTORY.length>1?' 🏆':'');
-  $('msRank').style.color=col;
-  renderHist();
-}
-function hideResult(){ $('resultArea').style.display='none'; }
-
-function showBtn(id,show){ $(id).style.display=show?'block':'none'; }
-
-/* ════════════════════════════════════════════════════
-   HISTORY BARS (practice only)
-════════════════════════════════════════════════════ */
-const HISTORY=[];
-function renderHist(){
-  const el=$('histEl');
-  if(!HISTORY.length){el.innerHTML='';return;}
-  const mx=Math.max(...HISTORY), mn=Math.min(...HISTORY);
-  el.innerHTML=HISTORY.map((v,i)=>{
-    const h=Math.max(4,Math.round((v/mx)*38));
-    const cls=v===mn?'hbar best':i===HISTORY.length-1?'hbar last':'hbar';
-    return `<div class="hb"><div class="${cls}" style="height:${h}px"></div><div class="hval">${v}</div></div>`;
+/* ══════════════════════════════════════
+   HISTORY BARS (practice)
+══════════════════════════════════════ */
+const HIST = [];
+function renderHist() {
+  const el = $('histRow');
+  if (!HIST.length) { el.innerHTML = ''; return; }
+  const mx = Math.max(...HIST), mn = Math.min(...HIST);
+  el.innerHTML = HIST.map((v, i) => {
+    const h = Math.max(4, Math.round((v / mx) * 38));
+    const cls = v === mn ? 'hb-bar is-best' : i === HIST.length - 1 ? 'hb-bar is-last' : 'hb-bar';
+    return `<div class="hb"><div class="${cls}" style="height:${h}px"></div><div class="hb-val">${v}</div></div>`;
   }).join('');
 }
 
-function rankMs(ms){
-  if(ms<150) return '🌟 LENDÁRIO';
-  if(ms<200) return '⚡ RELÂMPAGO';
-  if(ms<280) return '🔥 RÁPIDO';
-  if(ms<380) return '👍 BOM';
-  if(ms<500) return '😅 OK';
+function rankMs(ms) {
+  if (ms < 150) return '🌟 LENDÁRIO';
+  if (ms < 200) return '⚡ RELÂMPAGO';
+  if (ms < 280) return '🔥 RÁPIDO';
+  if (ms < 380) return '👍 BOM';
+  if (ms < 500) return '😅 OK';
   return '🐢 DEVAGAR';
 }
 
-/* ════════════════════════════════════════════════════
-   SENSOR ENGINE
+/* ══════════════════════════════════════════════════════
+   STATE MACHINE
    
-   CRITICAL FIX: Only sensors fire the gun. Never clicks/taps.
+   STATES:
+   idle     → menu, nothing active
+   holster  → waiting for phone to point down
+   waiting  → holstered, silent random countdown
+   draw     → SIGNAL fired — raise phone now!
+   result   → reaction time shown
+   early    → moved before signal
    
-   beta (deviceorientation):
-     Phone upright portrait  ≈ +90°
-     Phone pointing DOWN     ≈ -90°   ← HOLSTER
-     Phone horizontal flat   ≈   0°
+   MODES: 'practice' | 'online'
    
-   Holster detected: betaSmooth < -52° for 500ms
-   Draw detected:    fast positive delta beta (>20°/frame) OR betaSmooth > -15°
-════════════════════════════════════════════════════ */
-let betaSmooth = 0, betaPrev = 0;
-let holsterSince = 0;
-const HOLSTER_THRESH = -52;
+   SENSOR PHYSICS (Android deviceorientation):
+   beta = tilt forward/back
+     Phone upright (normal use)  ≈ +90°
+     Phone flat on table         ≈   0°
+     Phone pointing DOWN         ≈ -90°  ← HOLSTER POSITION
+   
+   We detect holster: betaSmooth < -50° for 500ms continuously
+   We detect draw:    betaSmooth delta > +20°/frame  OR  betaSmooth > -12°
+   We detect early:   betaSmooth moves up significantly during 'waiting'
+══════════════════════════════════════════════════════ */
+
+let STATE      = 'idle';
+let MODE       = 'practice';
+let drawAt     = 0;
+let silTimer   = null;
+let fired      = false;   // prevents double-fire
+let bestMs     = Infinity;
+let attempts   = 0;
+
+// Online only
+let myScore    = 0;
+let theirScore = 0;
+let myMs       = null;
+let theirMs    = null;
+let hostReady  = false;
+let guestReady = false;
+let peer       = null;
+let conn       = null;
+let role       = null;  // 'host' | 'guest'
+
+// Sensor state
+let betaSmooth    = 0;
+let betaPrev      = 0;
+let prevAy        = 0;
+let holsterSince  = 0;
+let sensorsOn     = false;
+
+const HOLSTER_THRESH = -50;
 const HOLSTER_MS     = 500;
 const DRAW_DELTA     = 20;
-const DRAW_ABS       = -15;
-let prevAy           = 0;
-let sensorsStarted   = false;
+const DRAW_ABS       = -12;
 
-function startSensors(){
-  if(sensorsStarted) return;
-  sensorsStarted=true;
+function startSensors() {
+  if (sensorsOn) return;
+  sensorsOn = true;
   window.addEventListener('deviceorientation', onOrient, true);
   window.addEventListener('devicemotion',      onMotion,  true);
 }
 
-function onOrient(e){
-  const raw = e.beta||0;
-  betaSmooth = betaSmooth*.6 + raw*.4;
+function onOrient(e) {
+  const raw = e.beta || 0;
+  betaSmooth = betaSmooth * .6 + raw * .4;
   const delta = betaSmooth - betaPrev;
   betaPrev = betaSmooth;
   const isDown = betaSmooth < HOLSTER_THRESH;
 
-  // Holster detection
-  if(GSTATE==='holster' || GSTATE==='result' || GSTATE==='early'){
-    if(isDown){
-      if(!holsterSince) holsterSince=Date.now();
-      if(Date.now()-holsterSince >= HOLSTER_MS){
-        holsterSince=0;
-        onPhoneHolstered();
+  // ── Holster detection ──
+  if (STATE === 'holster' || STATE === 'result' || STATE === 'early') {
+    if (isDown) {
+      if (!holsterSince) holsterSince = Date.now();
+      if (Date.now() - holsterSince >= HOLSTER_MS) {
+        holsterSince = 0;
+        onHolstered();
       }
     } else {
-      holsterSince=0;
+      holsterSince = 0;
     }
   }
 
-  // Early movement detection
-  if(GSTATE==='waiting'){
-    if(delta>18 && !isDown) onEarlyMove();
+  // ── Early move detection ──
+  if (STATE === 'waiting') {
+    if (delta > 18 && !isDown) onEarly();
   }
 
-  // Draw detection — ONLY from orientation, no clicks
-  if(GSTATE==='draw'){
-    if(delta>DRAW_DELTA || betaSmooth>DRAW_ABS){
-      onPhoneFired();
-    }
+  // ── Draw detection — ONLY sensor, never tap ──
+  if (STATE === 'draw') {
+    if (delta > DRAW_DELTA || betaSmooth > DRAW_ABS) onFired();
   }
 }
 
-function onMotion(e){
-  const a=e.accelerationIncludingGravity; if(!a) return;
-  const ay=a.y||0,ax=a.x||0,az=a.z||0;
-  const dAy = ay-prevAy; prevAy=ay;
-  const mag = Math.sqrt(ax*ax+ay*ay+az*az);
+function onMotion(e) {
+  const a = e.accelerationIncludingGravity;
+  if (!a) return;
+  const ay = a.y || 0, ax = a.x || 0, az = a.z || 0;
+  const dAy = ay - prevAy; prevAy = ay;
+  const mag  = Math.sqrt(ax * ax + ay * ay + az * az);
 
-  // Draw detection via accel — backup to orientation
-  if(GSTATE==='draw'){
-    if(dAy < -14 || mag > 22) onPhoneFired();
+  if (STATE === 'draw') {
+    if (dAy < -14 || mag > 22) onFired();
   }
 }
 
-/* ════════════════════════════════════════════════════
-   GAME STATE MACHINE
-   
-   States:
-   'idle'     - menu
-   'holster'  - waiting for phone to point down
-   'waiting'  - both holstered, silent countdown
-   'draw'     - SIGNAL! raise phone!
-   'result'   - round over, showing time
-   'early'    - moved too early
-   
-   Modes:
-   'practice' - solo
-   'online'   - multiplayer
-════════════════════════════════════════════════════ */
-let GSTATE    = 'idle';
-let GMODE     = 'practice'; // 'practice' | 'online'
-let drawAt    = 0;
-let silTimer  = null;
-let firedOnce = false;   // prevents double-fire per round
-let bestMs    = Infinity;
-let attempts  = 0;
+/* ══════════════════════════════════════
+   GAME FLOW
+══════════════════════════════════════ */
 
-// Online
-let peer=null, conn=null, role=null;
-let myScore=0, theirScore=0;
-let myMs=null, theirMs=null;
-let hostReady=false, guestReady=false;
-
-/* ── MODE SETUP ── */
-function enterPractice(){
-  GMODE='practice';
-  ensureAC();
-  startSensors();
+// ── Enter practice ──
+function startPractice() {
+  MODE = 'practice';
+  initAC(); startSensors();
+  HIST.length = 0; attempts = 0; bestMs = Infinity;
+  $('myName').textContent    = 'VOCÊ';
+  $('theirName').textContent = 'MELHOR';
+  $('vsLbl').textContent     = '·';
+  $('myScEl').textContent    = '0';    $('myScEl').className    = 'pl-sc';
+  $('theirScEl').textContent = '—';   $('theirScEl').className = 'pl-sc';
+  $('chipBot').textContent   = '🎯 MODO PRÁTICA';
   showPage('pgGame');
-  $('myNameLbl').textContent  = 'VOCÊ';
-  $('theirNameLbl').textContent = 'RECORDE';
-  $('vsLbl').textContent = '·';
-  $('theirScoreEl').textContent = '—';
-  $('theirScoreEl').className   = 'pl-sc';
-  $('myScoreEl').textContent    = '0';
-  $('myScoreEl').className      = 'pl-sc';
   goHolster();
 }
 
-function enterOnline(){
-  GMODE='online';
-  myScore=0; theirScore=0;
-  updateScores();
+// ── Enter online ──
+function startOnline() {
+  MODE = 'online';
+  myScore = 0; theirScore = 0;
+  $('myName').textContent    = 'VOCÊ';
+  $('theirName').textContent = 'RIVAL';
+  $('vsLbl').textContent     = 'VS';
+  updateOnlineScore();
+  $('chipBot').textContent   = '⚔️ MELHOR DE 5';
   showPage('pgGame');
-  $('myNameLbl').textContent    = 'VOCÊ';
-  $('theirNameLbl').textContent = 'RIVAL';
-  $('vsLbl').textContent        = 'VS';
   goHolster();
 }
 
-/* ── HOLSTER STATE ── */
-function goHolster(){
-  GSTATE='holster';
-  holsterSince=0;
-  firedOnce=false;
-  myMs=null; theirMs=null;
-  hideResult();
-  showBtn('btnNext',false);
-  showBtn('btnMenu',false);
-  gunState('holstered');
-  setStatus('Aponta pra baixo','SEGURA NA CINTURA COMO UM COLDRE','#2a1600');
-  $('chipBottom').textContent = GMODE==='online' ? '⚔️ MELHOR DE 5' : '🎯 MODO PRÁTICA';
-  $('chipBottom').style.visibility='visible';
-  document.body.style.background='#060300';
+// ── HOLSTER STATE ──
+function goHolster() {
+  STATE = 'holster';
+  holsterSince = 0;
+  fired = false;
+  myMs = null; theirMs = null;
+  showResultArea(false);
+  showBtn('btnNext', false);
+  showBtn('btnBack', false);
+  setGun('holster');
+  setLabel('Aponta pra baixo', 'SEGURA NA CINTURA COMO UM COLDRE', '#2a1600');
+  $('chipBot').style.visibility = 'visible';
+  document.body.style.background = '#060300';
 }
 
-/* ── HOLSTERED CALLBACK ── */
-function onPhoneHolstered(){
-  if(GSTATE!=='holster') return;
-  GSTATE='waiting';
-  holsterSince=0;
-  playReady();
-  vibrate(30);
-  gunState('waiting');
-  document.body.style.background='#040200';
-  $('chipBottom').style.visibility='hidden';
+// ── Phone confirmed holstered ──
+function onHolstered() {
+  if (STATE !== 'holster') return;
+  STATE = 'waiting';
+  holsterSince = 0;
+  sndReady(); vib(30);
+  setGun('waiting');
+  document.body.style.background = '#040200';
+  $('chipBot').style.visibility = 'hidden';
 
-  if(GMODE==='practice'){
-    setStatus('Aguarda...','NÃO MEXA','#1a1000');
-    startSilentCountdown();
+  if (MODE === 'practice') {
+    setLabel('Aguarda...', 'NÃO MEXA', '#1a1000');
+    scheduleDraw();
   } else {
-    // Online: tell host we're ready
-    send({type:'READY'});
-    if(role==='host'){
-      hostReady=true;
-      checkBothOnlineReady();
+    // Online
+    sendMsg({ type: 'READY' });
+    if (role === 'host') {
+      hostReady = true;
+      checkBothReady();
     } else {
-      guestReady=true;
-      setStatus('Aguarda...','ESPERANDO RIVAL...','#1a1000');
+      guestReady = true;
+      setLabel('Aguarda...', 'ESPERANDO RIVAL...', '#1a1000');
     }
   }
 }
 
-/* ── SILENT COUNTDOWN ── */
-function startSilentCountdown(){
+// ── Schedule draw (practice + online host) ──
+function scheduleDraw() {
   clearTimeout(silTimer);
-  const delay = 1500 + Math.random()*4500;
-  silTimer = setTimeout(()=>{
-    if(GSTATE==='waiting') fireSignal(Date.now());
-  }, delay);
+  const delay = 1600 + Math.random() * 4400;
+
+  if (MODE === 'online' && role === 'host') {
+    silTimer = setTimeout(() => {
+      if (STATE !== 'waiting') return;
+      const at = Date.now() + 700;   // 700ms buffer for network
+      sendMsg({ type: 'DRAW', at }); // tell guest
+      fireDrawAt(at);                // schedule self
+    }, delay);
+  } else {
+    silTimer = setTimeout(() => {
+      if (STATE === 'waiting') fireDrawAt(Date.now());
+    }, delay);
+  }
 }
 
-/* ── DRAW SIGNAL ── */
-function fireSignal(at){
-  if(GSTATE!=='waiting') return;
-  GSTATE   = 'draw';
-  drawAt   = at;
-  firedOnce= false;
+// ── Fire draw signal ──
+function fireDrawAt(at) {
+  const now = Date.now();
+  const wait = at - now;
+  if (wait > 0) {
+    setTimeout(() => { if (STATE === 'waiting') triggerDraw(at); }, wait);
+  } else {
+    triggerDraw(at);
+  }
+}
 
-  // Signal: vibrate + sound
-  vibrate(0);
-  setTimeout(()=>vibrate(500), 10);
-  playSignal();
+function triggerDraw(at) {
+  if (STATE !== 'waiting') return;
+  STATE = 'draw';
+  drawAt = at;
+  fired  = false;
+
+  vib(0);
+  setTimeout(() => vib(500), 10);
+  sndSignal();
   redFlash();
 
-  document.body.style.background='#160300';
-  gunState('drawn');
-  setStatus('⚡ SACA! ⚡','LEVANTA O CELULAR!','#f0c040');
-  $('statusLbl').style.textShadow='0 0 25px #f0c040';
+  document.body.style.background = '#150200';
+  setGun('draw');
+  setLabel('⚡ SACA! ⚡', 'LEVANTA O CELULAR!', '#f0c040');
 }
 
-/* ── PHONE FIRED ── */
-function onPhoneFired(){
-  if(GSTATE!=='draw') return;
-  if(firedOnce) return;
-  firedOnce = true;
+// ── Player fired ──
+function onFired() {
+  if (STATE !== 'draw') return;
+  if (fired) return;
+  fired = true;
 
   const ms = Date.now() - drawAt;
+  STATE = 'result';
 
-  // Impossible reaction — cheated
-  if(ms < 80){
+  if (ms < 80) {
+    // Impossible — cheated
     onCheat();
     return;
   }
 
-  vibrate(0);
-  vibrate([100,30,100]);
-  playGunshot();
-  flash();
-  fireGunAnim();
-  $('statusLbl').style.textShadow='';
-  document.body.style.background='#060300';
+  vib(0); vib([100, 30, 100]);
+  sndGunshot(); flash();
+  setGun('fired');
+  doMuzzleFlash();
+  document.body.style.background = '#060300';
+  $('stBig').style.textShadow = '';
 
-  if(GMODE==='practice'){
-    GSTATE='result';
+  if (MODE === 'practice') {
     attempts++;
-    if(ms<bestMs) bestMs=ms;
-    HISTORY.push(ms);
-    if(HISTORY.length>8) HISTORY.shift();
+    const isBest = ms < bestMs;
+    if (isBest) bestMs = ms;
+    HIST.push(ms);
+    if (HIST.length > 8) HIST.shift();
 
-    $('myScoreEl').textContent=attempts;
-    $('theirScoreEl').textContent=bestMs+'ms';
+    // Update score bar
+    $('myScEl').textContent    = attempts;
+    $('theirScEl').textContent = bestMs + 'ms';
+    if (isBest && attempts > 1) {
+      $('theirScEl').className = 'pl-sc hi';
+    }
 
-    const isBest=ms===bestMs;
-    setStatus(isBest&&attempts>1?'🏆 RECORDE!':'Atirou!','','#f0c040');
-    showResult(ms, rankMs(ms), isBest);
-    showBtn('btnNext',true);
-    showBtn('btnMenu',true);
+    // Show result
+    const col = ms < 150 ? '#2ecc71' : ms < 250 ? '#f0c040' : ms < 400 ? '#ff8800' : '#e74c3c';
+    $('msNumEl').innerHTML  = `<span style="color:${col}">${ms}</span><span class="ms-unit">ms</span>`;
+    $('msRankEl').textContent = rankMs(ms) + (isBest && attempts > 1 ? ' 🏆' : '');
+    $('msRankEl').style.color = col;
+    renderHist();
+    showResultArea(true);
+
+    setLabel(isBest && attempts > 1 ? '🏆 RECORDE!' : 'Atirou!', '', '#f0c040');
+    showBtn('btnNext', true);
+    showBtn('btnBack', true);
 
   } else {
     // Online
-    GSTATE='result';
-    myMs=ms;
-    send({type:'RESULT',ms});
-    setStatus('Atirou!',`Você: ${ms}ms — aguardando rival...`,'#f0c040');
-    showResult(ms, rankMs(ms), false);
-    tryResolveOnline();
+    myMs = ms;
+    sendMsg({ type: 'RESULT', ms });
+    const col = ms < 150 ? '#2ecc71' : ms < 250 ? '#f0c040' : ms < 400 ? '#ff8800' : '#e74c3c';
+    $('msNumEl').innerHTML    = `<span style="color:${col}">${ms}</span><span class="ms-unit">ms</span>`;
+    $('msRankEl').textContent = rankMs(ms);
+    $('msRankEl').style.color = col;
+    showResultArea(true);
+    setLabel('Atirou!', 'Aguardando rival...', '#f0c040');
+    tryResolve();
   }
 }
 
-/* ── EARLY MOVE ── */
-function onEarlyMove(){
-  if(GSTATE!=='waiting') return;
+// ── Moved too early ──
+function onEarly() {
+  if (STATE !== 'waiting') return;
   clearTimeout(silTimer);
-  GSTATE='early';
-  vibrate([400]);
-  playCheat();
-  gunState('holstered');
-  document.body.style.background='#100000';
-  setStatus('Antecipou!','ESPERA A VIBRAÇÃO','#e74c3c');
-  hideResult();
-  showBtn('btnNext',false);
-  showBtn('btnMenu',false);
+  STATE = 'early';
+  vib([400]); sndCheat();
+  setGun('early');
+  document.body.style.background = '#100000';
+  setLabel('Antecipou!', 'ESPERA A VIBRAÇÃO', '#e74c3c');
+  showResultArea(false);
+  showBtn('btnNext', false); showBtn('btnBack', false);
 
-  if(GMODE==='online'){
-    theirMs=null; myMs=9999;
-    send({type:'EARLY'});
-    tryResolveOnline();
+  if (MODE === 'online') {
+    myMs = 9999;
+    sendMsg({ type: 'EARLY' });
+    tryResolve();
   } else {
-    // practice: auto restart on holster
-    setTimeout(()=>{
-      setStatus('Aponta pra baixo','TENTA DE NOVO','#2a1600');
-      GSTATE='holster';
-      gunState('holstered');
-    },1500);
+    // Practice: auto-recover after 1.5s — user re-holsters to retry
+    setTimeout(() => {
+      if (STATE === 'early') {
+        setLabel('Aponta pra baixo', 'TENTA DE NOVO', '#2a1600');
+        STATE = 'holster';
+        setGun('holster');
+      }
+    }, 1500);
   }
 }
 
-/* ── CHEAT ── */
-function onCheat(){
-  GSTATE='result';
-  vibrate([500]);
-  playCheat();
-  gunState('holstered');
-  document.body.style.background='#100000';
-  setStatus('Burlou!','ATIROU ANTES DO SINAL','#e74c3c');
-  $('statusLbl').style.textShadow='';
+// ── Cheated (fired < 80ms) ──
+function onCheat() {
+  // STATE already set to 'result' by onFired
+  vib([600]); sndCheat();
+  setGun('early');
+  document.body.style.background = '#100000';
+  $('stBig').style.textShadow = '';
+  setLabel('Burlou!', 'ATIROU ANTES DO SINAL', '#e74c3c');
+  showResultArea(false);
 
-  if(GMODE==='online'){
-    myMs=9999;
-    send({type:'RESULT',ms:9999});
-    tryResolveOnline();
+  if (MODE === 'online') {
+    myMs = 9999;
+    sendMsg({ type: 'RESULT', ms: 9999 });
+    tryResolve();
   } else {
-    showBtn('btnNext',true);
-    showBtn('btnMenu',true);
+    showBtn('btnNext', true); showBtn('btnBack', true);
   }
 }
 
-/* ── NEXT BTN HANDLER ── */
-function onNextBtn(){
-  if(GMODE==='practice'){
+// ── Button: try again / next round ──
+function onBtnNext() {
+  if (MODE === 'practice') {
     goHolster();
   } else {
-    send({type:'ROUND_AGAIN'});
+    sendMsg({ type: 'ROUND_AGAIN' });
+    resetOnlineRound();
     goHolster();
   }
 }
 
-/* ══════════════════════════════════════════
+// ── Button: back to menu ──
+function onBtnBack() {
+  clearTimeout(silTimer);
+  STATE = 'idle';
+  if (peer) { try { peer.destroy(); } catch (e) {} peer = null; }
+  conn = null; role = null;
+  setGun('holster');
+  showPage('pgMenu');
+}
+
+/* ══════════════════════════════════════
    ONLINE LOGIC
-══════════════════════════════════════════ */
-function checkBothOnlineReady(){
-  if(hostReady && guestReady){
-    setStatus('Aguarda...','NÃO MEXA','#1a1000');
-    startSilentCountdown();
+══════════════════════════════════════ */
+function checkBothReady() {
+  if (hostReady && guestReady) {
+    setLabel('Aguarda...', 'NÃO MEXA', '#1a1000');
+    scheduleDraw();
   }
 }
 
-function tryResolveOnline(){
-  if(myMs===null || theirMs===null) return;
-  resolveOnlineRound();
+function resetOnlineRound() {
+  myMs = null; theirMs = null;
+  hostReady = false; guestReady = false;
+  fired = false;
+  showResultArea(false);
+  showBtn('btnNext', false); showBtn('btnBack', false);
 }
 
-function resolveOnlineRound(){
+function tryResolve() {
+  if (myMs === null || theirMs === null) return;
+  resolveRound();
+}
+
+function resolveRound() {
   const won = myMs < theirMs;
-  if(won) myScore++; else theirScore++;
-  updateScores();
+  if (won) myScore++; else theirScore++;
+  updateOnlineScore();
 
-  const col = won?'#2ecc71':'#e74c3c';
-  const detail = `Você: ${myMs>=9999?'BURLA':myMs+'ms'}  ·  Rival: ${theirMs>=9999?'BURLA':theirMs+'ms'}`;
-  const matchOver = myScore>=3 || theirScore>=3;
+  const col    = won ? '#2ecc71' : '#e74c3c';
+  const result = myMs >= 9999 ? 'BURLA' : myMs + 'ms';
+  const them   = theirMs >= 9999 ? 'BURLA' : theirMs + 'ms';
+  const over   = myScore >= 3 || theirScore >= 3;
 
-  document.body.style.background='#060300';
+  document.body.style.background = '#060300';
 
-  if(won && myMs<9999){
+  if (won && myMs < 9999) {
     flash();
-    spawnPts(innerWidth/2,innerHeight*.5,'#f0c040',20);
-    spawnPts(innerWidth/2,innerHeight*.5,'#ff8800',10);
+    spawnParts(innerWidth / 2, innerHeight * .5, '#f0c040', 20);
+    spawnParts(innerWidth / 2, innerHeight * .5, '#ff8800', 10);
   }
 
-  setStatus(
-    matchOver ? (won?'🏆 GANHOU!':'💀 PERDEU!') : (won?'🏆 VENCEU!':'💀 Perdeu...'),
-    detail,
+  setLabel(
+    over ? (won ? '🏆 VOCÊ GANHOU!' : '💀 VOCÊ PERDEU!') : (won ? '🏆 VENCEU!' : '💀 Perdeu...'),
+    `Você: ${result} · Rival: ${them}`,
     col
   );
 
-  if(matchOver){
-    showBtn('btnNext',false);
-    showBtn('btnMenu',true);
-    $('btnMenu').textContent = '← MENU';
+  if (over) {
+    showBtn('btnNext', false);
+    showBtn('btnBack', true);
+    $('btnBack').textContent = '← MENU';
   } else {
-    showBtn('btnNext',true);
-    showBtn('btnMenu',false);
     $('btnNext').textContent = 'PRÓXIMA RODADA →';
+    showBtn('btnNext', true);
+    showBtn('btnBack', false);
   }
 }
 
-function updateScores(){
-  $('myScoreEl').textContent  = myScore;
-  $('theirScoreEl').textContent = theirScore;
-  $('myScoreEl').className    = 'pl-sc'+(myScore>theirScore?' hi':'');
-  $('theirScoreEl').className = 'pl-sc'+(theirScore>myScore?' hi':'');
+function updateOnlineScore() {
+  $('myScEl').textContent    = myScore;
+  $('theirScEl').textContent = theirScore;
+  $('myScEl').className    = 'pl-sc' + (myScore > theirScore ? ' hi' : '');
+  $('theirScEl').className = 'pl-sc' + (theirScore > myScore  ? ' hi' : '');
 }
 
-/* ══════════════════════════════════════════
-   PEERJS — FIXED VERSION
-   Bug fixes:
-   - Only ONE Peer instance created per session
-   - Guest uses a random ID (not null, not duplicate)
-   - Proper connection lifecycle
-══════════════════════════════════════════ */
-function makePeer(customId){
-  const cfg={host:'0.peerjs.com',port:443,path:'/',secure:true,debug:0};
-  return customId ? new Peer(customId,cfg) : new Peer(cfg);
+/* ══════════════════════════════════════
+   PEERJS
+══════════════════════════════════════ */
+const PEER_CFG = { host: '0.peerjs.com', port: 443, path: '/', secure: true, debug: 0 };
+
+function newPeer(id) {
+  if (peer) { try { peer.destroy(); } catch (e) {} }
+  peer = id ? new Peer(id, PEER_CFG) : new Peer(PEER_CFG);
+  return peer;
 }
 
-function send(msg){
-  try{ if(conn&&conn.open) conn.send(JSON.stringify(msg)); }catch(e){}
+function sendMsg(obj) {
+  try { if (conn && conn.open) conn.send(JSON.stringify(obj)); } catch (e) {}
 }
 
-function onMessage(raw){
-  let msg;
-  try{ msg=JSON.parse(raw); }catch(e){ return; }
+function onMsg(raw) {
+  let m; try { m = JSON.parse(raw); } catch (e) { return; }
 
-  if(msg.type==='READY'){
-    if(role==='host'){
-      guestReady=true;
-      checkBothOnlineReady();
-    }
+  if (m.type === 'READY') {
+    if (role === 'host') { guestReady = true; checkBothReady(); }
   }
-
-  if(msg.type==='DRAW'){
-    // Guest schedules draw at the exact timestamp host sent
-    const delay = msg.at - Date.now();
-    setTimeout(()=>{ if(GSTATE==='waiting') fireSignal(msg.at); }, Math.max(0,delay));
+  if (m.type === 'DRAW') {
+    // Guest: schedule at the exact timestamp host picked
+    fireDrawAt(m.at);
   }
-
-  if(msg.type==='RESULT'){
-    theirMs=msg.ms;
-    tryResolveOnline();
+  if (m.type === 'RESULT') {
+    theirMs = m.ms;
+    tryResolve();
   }
-
-  if(msg.type==='EARLY'){
-    theirMs=9999;
-    // If I haven't fired yet, I win — record a win time
-    if(myMs===null){
-      myMs=1; // auto-win
-      setStatus('Rival antecipou!','VOCÊ VENCEU A RODADA 🤠','#2ecc71');
-    }
-    tryResolveOnline();
+  if (m.type === 'EARLY') {
+    theirMs = 9999;
+    if (myMs === null) { myMs = 1; } // auto-win
+    tryResolve();
   }
-
-  if(msg.type==='ROUND_AGAIN'){
-    myMs=null; theirMs=null;
-    hostReady=false; guestReady=false;
+  if (m.type === 'ROUND_AGAIN') {
+    resetOnlineRound();
     goHolster();
   }
 }
 
-function onDisconnect(){
-  GSTATE='idle';
+function onDisconnect() {
+  STATE = 'idle';
   clearTimeout(silTimer);
-  document.body.style.background='#060300';
-  setStatus('📵 Desconectou','','#e74c3c');
-  showBtn('btnMenu',true);
-  showBtn('btnNext',false);
+  document.body.style.background = '#060300';
+  setLabel('📵 Rival desconectou', '', '#e74c3c');
+  showResultArea(false);
+  showBtn('btnNext', false);
+  showBtn('btnBack', true);
+  $('btnBack').textContent = '← MENU';
 }
 
-/* ── CREATE ROOM ── */
-$('btnCreate').addEventListener('click',()=>{
-  ensureAC();
-  startSensors();
-  role='host';
-  myScore=0; theirScore=0;
-  hostReady=false; guestReady=false;
+/* ══════════════════════════════════════
+   BUTTON HANDLERS
+══════════════════════════════════════ */
+$('btnPratica').addEventListener('click', () => {
+  initAC(); startPractice();
+});
 
-  const code=makeCode();
-  $('roomCode').textContent=code;
-  $('hostDot').className='dot pulse';
-  $('hostStatus').textContent='Abrindo sala...';
+$('btnCreate').addEventListener('click', () => {
+  initAC(); startSensors();
+  role = 'host'; hostReady = false; guestReady = false;
+
+  const code = makeCode();
+  $('roomCode').textContent = code;
+  $('hostDot').className    = 'dot blink';
+  $('hostStatus').textContent = 'Abrindo sala...';
   showPage('pgHost');
 
-  if(peer){ try{peer.destroy();}catch(e){} }
-  peer=makePeer('qdraw-'+code);
-
-  peer.on('open',()=>{
-    $('hostStatus').textContent='Sala aberta!';
-  });
-  peer.on('connection',c=>{
-    conn=c;
-    conn.on('open',()=>{
-      $('hostDot').className='dot on';
-      $('hostStatus').textContent='Rival conectado! 🤠';
-      setTimeout(()=>enterOnline(),800);
+  newPeer('qdraw-' + code);
+  peer.on('open', () => { $('hostStatus').textContent = 'Sala aberta! Aguardando...'; });
+  peer.on('connection', c => {
+    conn = c;
+    conn.on('open', () => {
+      $('hostDot').className    = 'dot green';
+      $('hostStatus').textContent = 'Rival conectado! 🤠';
+      setTimeout(() => startOnline(), 800);
     });
-    conn.on('data',onMessage);
-    conn.on('close',onDisconnect);
+    conn.on('data',  onMsg);
+    conn.on('close', onDisconnect);
   });
-  peer.on('error',err=>{
-    $('hostStatus').textContent='Erro: '+err.type+'. Tenta de novo.';
+  peer.on('error', err => {
+    $('hostStatus').textContent = 'Erro: ' + err.type + '. Tenta de novo.';
   });
 });
 
-/* ── JOIN ROOM ── */
-$('btnJoinOpen').addEventListener('click',()=>{
+$('btnJoinOpen').addEventListener('click', () => {
   showPage('pgJoin');
-  setTimeout(()=>$('codeInput').focus(),300);
+  setTimeout(() => $('codeInput').focus(), 300);
 });
 
-$('btnConnect').addEventListener('click',()=>{
-  ensureAC();
-  startSensors();
-  const code=$('codeInput').value.toUpperCase().trim();
-  if(code.length!==4){ $('joinError').textContent='Código precisa ter 4 letras'; return; }
-  $('joinError').textContent='Conectando...';
-  role='guest';
-  hostReady=false; guestReady=false;
-  myScore=0; theirScore=0;
+$('btnConnect').addEventListener('click', () => {
+  initAC(); startSensors();
+  const code = $('codeInput').value.toUpperCase().trim();
+  if (code.length !== 4) { $('joinError').textContent = 'Código precisa ter 4 letras'; return; }
+  $('joinError').textContent = 'Conectando...';
+  role = 'guest'; hostReady = false; guestReady = false;
 
-  if(peer){ try{peer.destroy();}catch(e){} }
-  peer=makePeer(null); // random ID for guest
-
-  peer.on('open',()=>{
-    conn=peer.connect('qdraw-'+code,{reliable:true});
-    conn.on('open',()=>{
-      $('joinError').textContent='';
-      enterOnline();
+  newPeer(null); // random peer ID for guest
+  peer.on('open', () => {
+    conn = peer.connect('qdraw-' + code, { reliable: true });
+    conn.on('open', () => {
+      $('joinError').textContent = '';
+      startOnline();
     });
-    conn.on('data',onMessage);
-    conn.on('close',onDisconnect);
-    conn.on('error',()=>{ $('joinError').textContent='Código inválido ou expirado.'; });
+    conn.on('data',  onMsg);
+    conn.on('close', onDisconnect);
+    conn.on('error', () => { $('joinError').textContent = 'Código inválido ou expirado.'; });
   });
-  peer.on('error',()=>{ $('joinError').textContent='Erro de conexão. Tenta de novo.'; });
+  peer.on('error', () => { $('joinError').textContent = 'Falha na conexão. Tenta de novo.'; });
 });
 
-/* ── PRACTICE ── */
-$('btnPratica').addEventListener('click',()=>{
-  ensureAC();
-  startSensors();
-  HISTORY.length=0;
-  attempts=0; bestMs=Infinity;
-  enterPractice();
-});
-
-/* ── CANCEL ── */
-$('btnCancelHost').addEventListener('click',()=>{
-  if(peer){try{peer.destroy();}catch(e){}}
-  peer=null;conn=null;
+$('btnCancelHost').addEventListener('click', () => {
+  if (peer) { try { peer.destroy(); } catch (e) {} peer = null; }
   showPage('pgMenu');
 });
-$('btnCancelJoin').addEventListener('click',()=>{ showPage('pgMenu'); });
-$('codeInput').addEventListener('input',e=>{ e.target.value=e.target.value.toUpperCase(); });
+$('btnCancelJoin').addEventListener('click', () => showPage('pgMenu'));
+$('codeInput').addEventListener('input', e => { e.target.value = e.target.value.toUpperCase(); });
 
-/* ── BACK TO MENU ── */
-function backToMenu(){
-  GSTATE='idle';
-  clearTimeout(silTimer);
-  if(peer){try{peer.destroy();}catch(e){}}
-  peer=null;conn=null;role=null;
-  gunState('holstered');
-  showPage('pgMenu');
-}
-
-/* ── CODE GEN ── */
-function makeCode(){
-  const c='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let r='';for(let i=0;i<4;i++)r+=c[Math.floor(Math.random()*c.length)];
+/* ══════════════════════════════════════
+   UTILS
+══════════════════════════════════════ */
+function makeCode() {
+  const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let r = '';
+  for (let i = 0; i < 4; i++) r += c[Math.floor(Math.random() * c.length)];
   return r;
 }
-
-/* ══════════════════════════════════════════
-   HOST: sends draw timestamp when both ready
-   This runs startSilentCountdown which already
-   handles sending to guest via the timeout cb
-   We override startSilentCountdown for online host
-══════════════════════════════════════════ */
-const _origStartSilent = startSilentCountdown;
-// patch: for online host, also send DRAW to guest
-const _patchedStartSilent = function(){
-  clearTimeout(silTimer);
-  const delay = 1500 + Math.random()*4500;
-  silTimer = setTimeout(()=>{
-    if(GSTATE!=='waiting') return;
-    if(GMODE==='online' && role==='host'){
-      const at = Date.now()+700; // 700ms ahead so guest has time
-      send({type:'DRAW', at});
-      fireSignal(at);
-    } else {
-      fireSignal(Date.now());
-    }
-  }, delay);
-};
-
-// Replace the function
-Object.defineProperty(window,'startSilentCountdown',{
-  get(){ return _patchedStartSilent; }
-});
-
-/* ══════════════════════════════════════════
-   IMPORTANT: No click/touch events fire the gun.
-   Gun only fires from sensors (onOrient / onMotion).
-   This was the main bug — now fixed.
-══════════════════════════════════════════ */
 </script>
 </body>
 </html>
