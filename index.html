@@ -469,16 +469,22 @@ function initAC() {
 
 function sndSignal() {
   initAC();
-  // High beep + mid beep — clear "GO" sound
-  [[1100, .9, 0], [650, .7, .06]].forEach(([freq, vol, del]) => {
-    const o = AC.createOscillator(), g = AC.createGain();
-    o.connect(g); g.connect(AC.destination);
-    o.type = 'square'; o.frequency.value = freq;
-    const t = AC.currentTime + del;
-    g.gain.setValueAtTime(vol, t);
-    g.gain.exponentialRampToValueAtTime(.001, t + .17);
-    o.start(t); o.stop(t + .2);
-  });
+  // Noise burst — like a starter pistol crack
+  const buf = AC.createBuffer(1, AC.sampleRate * .35, AC.sampleRate);
+  const d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++)
+    d[i] = (Math.random() * 2 - 1) * Math.exp(-i / AC.sampleRate * 18) * (i < 80 ? i / 80 : 1);
+  const s = AC.createBufferSource(), gn = AC.createGain(), f = AC.createBiquadFilter();
+  f.type = 'bandpass'; f.frequency.value = 1200; f.Q.value = 0.5;
+  gn.gain.value = 1.4;
+  s.buffer = buf; s.connect(f); f.connect(gn); gn.connect(AC.destination); s.start();
+  // Sharp high beep on top
+  const o = AC.createOscillator(), g2 = AC.createGain();
+  o.connect(g2); g2.connect(AC.destination);
+  o.type = 'square'; o.frequency.value = 1400;
+  g2.gain.setValueAtTime(1.0, AC.currentTime);
+  g2.gain.exponentialRampToValueAtTime(.001, AC.currentTime + .12);
+  o.start(); o.stop(AC.currentTime + .15);
 }
 
 function sndGunshot() {
@@ -662,8 +668,8 @@ let prevAy        = 0;
 let holsterSince  = 0;
 let sensorsOn     = false;
 
-const HOLSTER_THRESH = -50;
-const HOLSTER_MS     = 500;
+const HOLSTER_THRESH = -45; // detecta coldre
+const HOLSTER_MS     = 400; // confirma em 400ms
 const DRAW_DELTA     = 20;
 const DRAW_ABS       = -12;
 
@@ -696,7 +702,7 @@ function onOrient(e) {
 
   // ── Early move detection ──
   if (STATE === 'waiting') {
-    if (delta > 18 && !isDown) onEarly();
+    if (delta > 6) onEarly(); // qualquer movimento ja e antecipou
   }
 
   // ── Draw detection — ONLY sensor, never tap ──
@@ -827,7 +833,7 @@ function triggerDraw(at) {
   fired  = false;
 
   vib(0);
-  setTimeout(() => vib(500), 10);
+  setTimeout(() => vib(800), 10); // vibração longa e forte
   sndSignal();
   redFlash();
 
